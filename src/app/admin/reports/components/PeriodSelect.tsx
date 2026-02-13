@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import { http } from "@/lib/http";
+import { reportsApi } from "@/lib/api/reports.api";
 import { toast } from "sonner";
 
 type Period = {
@@ -19,14 +19,20 @@ export default function PeriodSelect({
   onChange: (id: string) => void;
 }) {
   const [periods, setPeriods] = useState<Period[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
       try {
-        const res = await http("/work/periods?page=1&limit=50");
-        setPeriods(res.data ?? []);
+        setLoading(true);
+
+        const res = await reportsApi.getPeriods();
+
+        setPeriods(res.items ?? []);
       } catch {
         toast.error("Error cargando periodos");
+      } finally {
+        setLoading(false);
       }
     }
 
@@ -41,7 +47,7 @@ export default function PeriodSelect({
 
     return `${formatter.format(new Date(p.startDate))} - ${formatter.format(
       new Date(p.endDate)
-    )}${p.closedAt ? " (Cerrado)" : ""}`;
+    )}${p.closedAt ? " (Cerrado)": ""}`;
   }
 
   return (
@@ -53,14 +59,19 @@ export default function PeriodSelect({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="h-11 px-3 rounded-xl border border-border bg-surface text-sm text-text"
+        className="
+          h-11 px-3 rounded-xl border border-border bg-surface
+          text-sm "
       >
         <option value="">
-          Selecciona un periodo
+          {loading ? "Cargando..." : "Selecciona un periodo"}
         </option>
 
         {periods.map((p) => (
-          <option key={p.id} value={p.id}>
+          <option
+            key={p.id}
+            value={p.id}
+          >
             {formatLabel(p)}
           </option>
         ))}

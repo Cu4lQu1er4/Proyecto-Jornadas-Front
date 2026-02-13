@@ -21,21 +21,34 @@ type Summary = {
 
 export default function AdminReportsPage() {
   const [periodId, setPeriodId] = useState<string>("");
-  const [employeeFilter, setEmployeeFilter] = useState<string>("");
+  const [documentFilter, setDocumentFilter] = useState<string>("");
   const [data, setData] = useState<Summary | null>(null);
   const [loading, setLoading] = useState(false);
 
+  function formatMinutes(min: number) {
+    const h = Math.floor(min / 60);
+    const m = min % 60;
+    return `${h}h ${m}m`;
+  }
+
   async function load() {
-    if (!periodId) return;
+    if (!periodId) {
+      setData(null);
+      return;
+    }
 
     try {
       setLoading(true);
 
-      const res = await reportsApi.getSummary(periodId, employeeFilter || undefined);
+      const res = await reportsApi.getSummary(
+        periodId,
+        documentFilter || undefined
+      );
 
       setData(res);
     } catch {
       toast.error("Error cargando reporte");
+      setData(null);
     } finally {
       setLoading(false);
     }
@@ -43,54 +56,58 @@ export default function AdminReportsPage() {
 
   useEffect(() => {
     load();
-  }, [periodId, employeeFilter]);
+  }, [periodId, documentFilter]);
 
   return (
-    <main className="min-h-screen bg-background px-6 py-8">
-      <div className="max-w-7xl mx-auto flex flex-col gap-6">
+    <div className="flex flex-col gap-6">
 
-        {/* HEADER */}
-        <section className="flex flex-col gap-1">
-          <h1 className="text-lg font-semibold text-text">
-            Reportes de asistencia
-          </h1>
-          <p className="text-sm text-text-muted">
-            Resumen general por periodo
-          </p>
-        </section>
+      {/* HEADER */}
+      <section className="flex flex-col gap-1">
+        <h1 className="text-lg font-semibold text-text">
+          Reportes de asistencia
+        </h1>
+        <p className="text-sm text-text-muted">
+          Resumen general por periodo
+        </p>
+      </section>
 
-        {/* FILTROS */}
-        <section className="bg-white border border-border rounded-2xl p-6 flex flex-col gap-6">
+      {/* FILTROS */}
+      <section className="bg-white border border-border rounded-2xl p-6 flex flex-col gap-6">
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-            <div className="flex flex-col gap-2">
+          <PeriodSelect
+            value={periodId}
+            onChange={setPeriodId}
+          />
 
-              <PeriodSelect
-                value={periodId}
-                onChange={setPeriodId}
-              />
-            </div>
+          <div className="flex flex-col gap-2">
+            <label className="text-sm text-text">
+              Filtrar por documento (opcional)
+            </label>
 
-            <div className="flex flex-col gap-2">
-              <label className="text-sm text-text">
-                Filtrar por empleado (opcional)
-              </label>
-
-              <input
-                value={employeeFilter}
-                onChange={(e) => setEmployeeFilter(e.target.value)}
-                placeholder="ID empleado"
-                className="h-11 px-3 rounded-xl border border-border bg-surface text-sm text-text"
-              />
-            </div>
-
+            <input
+              value={documentFilter}
+              onChange={(e) => setDocumentFilter(e.target.value)}
+              placeholder="EMP-2"
+              className="h-11 px-4 rounded-xl border border-border bg-surface text-text text-sm focus:outline-none"
+            />
           </div>
 
-        </section>
+        </div>
 
-        {/* CARDS RESUMEN */}
-        {data && (
+      </section>
+
+      {/* LOADING */}
+      {loading && (
+        <div className="text-sm text-text-muted">
+          Cargando reporte...
+        </div>
+      )}
+
+      {/* RESUMEN */}
+      {data && !loading && (
+        <>
           <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
             <div className="bg-white border border-border rounded-2xl p-6 flex flex-col gap-2">
@@ -121,10 +138,8 @@ export default function AdminReportsPage() {
             </div>
 
           </section>
-        )}
 
-        {/* TABLA */}
-        {data && (
+          {/* DETALLE */}
           <section className="bg-white border border-border rounded-2xl p-6 flex flex-col gap-6">
 
             <div className="flex flex-col gap-1">
@@ -136,38 +151,63 @@ export default function AdminReportsPage() {
               </p>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-text">
+            {data.rows.length === 0 ? (
+              <div className="text-sm text-text-muted">
+                No hay empleados para este filtro
+              </div>
+            ) : (
+              <div className="flex flex-col gap-4">
 
-                <thead className="border-b border-border text-text-muted">
-                  <tr>
-                    <th className="text-left py-3">Empleado</th>
-                    <th className="text-left py-3">Trabajado</th>
-                    <th className="text-left py-3">Inasistencias</th>
-                    <th className="text-left py-3">Justificado</th>
-                    <th className="text-left py-3">Estado</th>
-                  </tr>
-                </thead>
+                {data.rows.map((row) => (
+                  <div
+                    key={row.employeeId}
+                    className="border border-border rounded-xl p-4 flex justify-between items-center text-sm"
+                  >
 
-                <tbody>
-                  {data.rows.map((row) => (
-                    <tr key={row.employeeId} className="border-b border-border">
-                      <td className="py-3">{row.document}</td>
-                      <td>{row.workedMinutes} min</td>
-                      <td>{row.absences}</td>
-                      <td>{row.justified}</td>
-                      <td>{row.status}</td>
-                    </tr>
-                  ))}
-                </tbody>
+                    {/* INFO */}
+                    <div className="flex flex-col gap-1">
+                      <span className="font-medium text-text">
+                        {row.document}
+                      </span>
 
-              </table>
-            </div>
+                      <span className="text-text-muted text-xs">
+                        Trabajado: {formatMinutes(row.workedMinutes)}
+                      </span>
+                    </div>
+
+                    {/* METRICAS */}
+                    <div className="flex items-center gap-4">
+
+                      <span className="bg-danger-soft text-danger px-3 py-1 rounded-full text-xs">
+                        Inasistencias: {row.absences}
+                      </span>
+
+                      <span className="bg-warning-soft text-warning px-3 py-1 rounded-full text-xs">
+                        Justificado: {row.justified}
+                      </span>
+
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs ${
+                          row.status === "IRREGULAR"
+                            ? "bg-danger-soft text-danger"
+                            : "bg-success-soft text-success"
+                        }`}
+                      >
+                        {row.status}
+                      </span>
+
+                    </div>
+
+                  </div>
+                ))}
+
+              </div>
+            )}
 
           </section>
-        )}
+        </>
+      )}
 
-      </div>
-    </main>
+    </div>
   );
 }

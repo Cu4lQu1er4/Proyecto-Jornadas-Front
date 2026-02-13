@@ -1,6 +1,9 @@
 import { http } from "../http";
 
 export const reportsApi = {
-  getSummary: (periodId: string, employeeId?: string) =>
-    http(`/reports/summary?periodId=${periodId}${employeeId ? `&employeeId=${employeeId}` : ""}`),
+  getSummary: (periodId: string, document?: string) =>
+    http(`/admin/attendance/summary?periodId=${periodId}${document ? `&document=${document}` : ""}`),
+
+  getPeriods: () =>
+    http("/work/periods?page=1&limit=50"),
 };

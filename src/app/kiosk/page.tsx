@@ -19,6 +19,7 @@ export default function KioskPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [now, setNow] = useState(new Date());
+  const [pin, setPin] = useState("");
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -34,28 +35,40 @@ export default function KioskPage() {
     }
   }, [employee]);
 
-  async function handleLogin() {
-    setLoading(true);
-    setError(null);
+  async function handleKioskLogin(pinValue: string) {
+    if (!document) {
+      setError("Ingrese su documento");
+      setPin("");
+      return;
+    }
 
     try {
+      setLoading(true);
+      setError(null);
+
       const res = await fetch(
-        'http://localhost:3001/api/auth/login',
+        'http://localhost:3001/api/auth/kiosk-login',
         {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ document, password }),
-          credentials: 'include',
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            document,
+            pin: pinValue,
+          }),
         }
       );
 
-      if (!res.ok) throw new Error('Credenciales invalidas');
+      if (!res.ok) {
+        throw new Error("PIN incorrecto");
+      }
 
       setEmployee({ document });
       await fetchStatus();
-
-    } catch (e:any) {
-      setError(e.message);
+      setPin("");
+    } catch {
+      setError("PIN incorrecto");
+      setPin("");
     } finally {
       setLoading(false);
     }
@@ -81,10 +94,12 @@ export default function KioskPage() {
   async function handleMainAction() {
     if (!status || loading) return;
 
+    const wasOpen = status.hasOpenWorkday;
+
     setLoading(true);
     setError(null);
 
-    const url = status.hasOpenWorkday
+    const url = wasOpen
       ? 'http://localhost:3001/api/work/end'
       : 'http://localhost:3001/api/work/start';
 
@@ -106,7 +121,10 @@ export default function KioskPage() {
         }
 
         await fetchStatus();
-        return;
+        
+        if (wasOpen) {
+          handleLogout();
+        }
       }
 
       if (!res.ok) {
@@ -142,59 +160,92 @@ export default function KioskPage() {
     });
   }
 
+  function handlePinInput(value: string) {
+    if (pin.length >= 4) return;
+
+    const newPin = pin + value;
+    setPin(newPin);
+
+    if (newPin.length === 4) {
+      handleKioskLogin(newPin);
+    }
+  }
+
+  function clearPin() {
+    setPin("");
+  }
+
   if (!employee) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-background px-4">
-        <div className="w-full max-w-md bg-white border border-border rounded-2xl p-6 flex flex-col gap-6">
-
-          <header className="flex flex-col gap-1 text-center">
-            <h1 className="text-lg font-semibold text-text">
+      <main className="min-h-screen flex items-center justify-center bg-background">
+        <div className="w-full max-w-md bg-white border border-border rounded-3xl p-8 flex flex-col gap-8">
+          <header className="text-center flex flex-col gap-2">
+            <h1 className="text-xl font-semibold text-text">
               Registro de jornada
             </h1>
             <p className="text-sm text-text-muted">
-              Ingresa tus credenciales
+              Ingrese su documento y PIN
             </p>
           </header>
 
-          <div className="flex flex-col gap-4">
+          <input
+            placeholder="Documento"
+            value={document}
+            onChange={(e) => setDocument(e.target.value)}
+            className="h-12 px-4 rounded-2xl border border.border bg-surface text-text text-base text-center"
+          />
 
-            <input
-              placeholder="Documento"
-              value={document}
-              onChange={(e) => setDocument(e.target.value)}
-              className="h-11 px-4 rounded-xl border border-border bg-surface text-text text-sm focus:outline-none"
-            />
-
-            <input
-              type="password"
-              placeholder="Contraseña"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="h-11 px-4 rounded-xl border border-border bg-surface text-text text-sm focus:outline-none"
-            />
-
-            {error && (
-              <p className="text-sm text-danger text-center">
-                {error}
-              </p>
-            )}
-
-            <button
-              onClick={handleLogin}
-              disabled={loading}
-              className="h-10 px-4 rounded-xl bg-primary text-white text-sm font-medium transition hover:opacity-90 disabled:opacity-50"
-            >
-              {loading ? 'Ingresando...' : 'Ingresar'}
-            </button>
-
+          <div className="flex justify-center gap-4">
+            {[0, 1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="w-6 h-6 rounded-full border-2 border-primary flex items-center justify-center"
+              >
+                {pin[i] ? (
+                  <div className="w-3 h-3 rounded-full bg-primary" />
+                ) : null}
+              </div>  
+            ))}
           </div>
 
+          <div className="grid grid-cols-3 gap-4 mt-4">
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
+              <button
+                key={n}
+                onClick={() => handlePinInput(String(n))}
+                className="h-16 rounded-2xl bg-gray-100 text-sl font-semibold hover:bg-gray-200"
+              >
+                {n}
+              </button>
+            ))}
+
+            <button
+              onClick={clearPin}
+              className="h-16 rounded-2xl bg-danger-soft text-danger font-semibold"
+            >
+              Borrar
+            </button>
+
+            <button
+              onClick={() => handlePinInput("0")}
+              className="h-16 rounded-2xl bg-gray-100 text-xl font-semibold hover:bg-gray-200"
+            >
+              0
+            </button>
+
+            <div />
+          </div>
+
+          {error && (
+            <p className="text-sm text-danger text-center">
+              {error}
+            </p>
+          )}
         </div>
       </main>
     );
   }
 
-  /* ================= WORKDAY SCREEN ================= */
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-surface px-4">

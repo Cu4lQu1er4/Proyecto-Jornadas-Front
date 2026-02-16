@@ -25,11 +25,11 @@ export default function LoginForm() {
     try {
       await authApi.login(document, password);
 
-      const me = await authApi.me();
+      const response = await authApi.login(document, password);
 
-      if (me.role === "EMPLOYEE") {
+      if (response.employee.role === "EMPLOYEE") {
         router.replace("/employee");
-      } else if (me.role === "ADMIN") {
+      } else if (response.employee.role === "ADMIN") {
         router.replace("/admin");
       } else {
         throw new Error ("UNKNOW_ROLE");

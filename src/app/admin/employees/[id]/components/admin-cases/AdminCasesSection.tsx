@@ -61,7 +61,6 @@ export default function AdminCaseSection({ employeeId }: Props) {
 
       </div>
 
-      <div className="bg-white border border-border rounded-2xl p-6">
 
         {loading ? (
           <div className="py-8 text-sm text-text-muted">
@@ -77,8 +76,6 @@ export default function AdminCaseSection({ employeeId }: Props) {
             onReload={loadCases}
           />
         )}
-
-      </div>
 
       {showModal && (
         <CreateAdminCaseModal

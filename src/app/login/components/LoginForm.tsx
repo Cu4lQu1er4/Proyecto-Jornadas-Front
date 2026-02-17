@@ -27,6 +27,11 @@ export default function LoginForm() {
 
       const response = await authApi.login(document, password);
 
+      if (response.needsOnboarding) {
+        router.replace("/onboarding");
+        return;
+      }
+
       if (response.employee.role === "EMPLOYEE") {
         router.replace("/employee");
       } else if (response.employee.role === "ADMIN") {

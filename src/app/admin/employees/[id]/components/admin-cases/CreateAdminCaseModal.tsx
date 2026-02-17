@@ -28,38 +28,45 @@ export default function CreateAdminCaseModal({
   }
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!date) {
-      toast.warning("Debes seleccionar una fecha");
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      await adminCaseApi.create({
-        employeeId,
-        type,
-        notes: notes || null,
-        scopes: [
-          {
-            date,
-            startMinute: startMinute ? timeToMinutes(startMinute) : null,
-            endMinute: endMinute ? timeToMinutes(endMinute) : null,
-          },
-        ],
-      });
-
-      toast.success("Caso cerrado correctamente")
-      onCreated();
-      onClose();
-    } catch (err: any) {
-      toast.error("Error al crear el caso");
-    } finally {
-      setLoading(false);
-    }
+  if (!date) {
+    toast.warning("Debes seleccionar una fecha");
+    return;
   }
+
+  setLoading(true);
+
+  try {
+    const scope: any = {
+      date,
+    };
+
+    if (startMinute) {
+      scope.startMinute = timeToMinutes(startMinute);
+    }
+
+    if (endMinute) {
+      scope.endMinute = timeToMinutes(endMinute);
+    }
+
+    await adminCaseApi.create({
+      employeeId,
+      type,
+      notes: notes || undefined,
+      scopes: [scope],
+    });
+
+    toast.success("Caso creado correctamente");
+    onCreated();
+    onClose();
+
+  } catch (err: any) {
+    toast.error("Error al crear el caso");
+  } finally {
+    setLoading(false);
+  }
+}
 
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">

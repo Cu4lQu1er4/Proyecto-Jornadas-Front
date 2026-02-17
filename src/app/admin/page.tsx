@@ -12,11 +12,11 @@ async function getData() {
   };
 
   const [employeesRes, periodsRes] = await Promise.all([
-    fetch('http://localhost:3001/api/work/admin/employees', {
+    fetch("http://localhost:3001/api/work/admin/employees", {
       headers,
       cache: "no-store",
     }),
-    fetch('http://localhost:3001/api/work/periods', {
+    fetch("http://localhost:3001/api/work/periods", {
       headers,
       cache: "no-store",
     }),
@@ -25,7 +25,8 @@ async function getData() {
   const employees = employeesRes.ok ? await employeesRes.json() : [];
   const periodsData = periodsRes.ok ? await periodsRes.json() : { data: [] };
 
-  const openPeriods = periodsData.data?.filter((p: any) => !p.closedAt) ?? [];
+  const openPeriods =
+    periodsData.data?.filter((p: any) => !p.closedAt) ?? [];
 
   return {
     totalEmployees: employees.length,
@@ -37,11 +38,12 @@ export default async function AdminDashboard() {
   const data = await getData();
 
   return (
-    <main className="min-h-screen bg-surface px-6 py-8">
-      <div className="max-w-7xl mx-auto flex flex-col gap-8">
+    <main className="min-h-screen bg-surface p-6 rounded-2xl border border-border">
+      <div className="max-w-7xl mx-auto flex flex-col gap-6">
 
+        {/* Header */}
         <header className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold">
+          <h1 className="text-lg font-semibold text-text">
             Panel de administración
           </h1>
           <p className="text-sm text-text-muted">
@@ -49,6 +51,7 @@ export default async function AdminDashboard() {
           </p>
         </header>
 
+        {/* Grid */}
         <section
           className="
             grid
@@ -64,7 +67,7 @@ export default async function AdminDashboard() {
           />
 
           <Card
-            title="Periodos abiertos"
+            title="Períodos abiertos"
             value={data?.openPeriods ?? 0}
           />
 
@@ -78,6 +81,7 @@ export default async function AdminDashboard() {
             height="tall"
           />
         </section>
+
       </div>
     </main>
   );

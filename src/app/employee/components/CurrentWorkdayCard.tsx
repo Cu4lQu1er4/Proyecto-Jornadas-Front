@@ -14,7 +14,10 @@ type Props = {
 export default function CurrentWorkdayCard({ data }: Props) {
   if (!data) {
     return (
-      <div className="bg-white border border-border rounded-2xl p-6">
+      <div className="bg-white border border-border rounded-2xl p-6 flex flex-col gap-2">
+        <h2 className="text-lg font-semibold text-text">
+          Jornada de hoy
+        </h2>
         <p className="text-sm text-text-muted">
           No hay información disponible para hoy
         </p>
@@ -73,7 +76,7 @@ export default function CurrentWorkdayCard({ data }: Props) {
         </div>
 
         <span
-          className={`text-xs px-3 py-1 rounded-full ${statusStyle}`}
+          className={`px-3 py-1 rounded-full text-xs font-medium ${statusStyle}`}
         >
           {statusMap[status] ?? status}
         </span>
@@ -104,6 +107,7 @@ export default function CurrentWorkdayCard({ data }: Props) {
           <span className="text-text-muted">
             Diferencia
           </span>
+
           <span
             className={`font-medium ${
               isPositive ? "text-success" : "text-danger"
@@ -121,13 +125,13 @@ export default function CurrentWorkdayCard({ data }: Props) {
         <div className="flex flex-wrap gap-3 text-xs">
 
           {lateArrival && (
-            <span className="px-3 py-1 rounded-full bg-warning-soft text-warning">
+            <span className="px-3 py-1 rounded-full text-xs font-medium bg-warning-soft text-warning">
               Llegada tarde
             </span>
           )}
 
           {earlyLeave && (
-            <span className="px-3 py-1 rounded-full bg-warning-soft text-warning">
+            <span className="px-3 py-1 rounded-full text-xs font-medium bg-warning-soft text-warning">
               Salida anticipada
             </span>
           )}

@@ -36,9 +36,7 @@ export default function EmployeeDayLookup({
         </p>
       </div>
 
-      <div className="bg-white border border-border rounded-2xl p-6 flex flex-col gap-4">
 
-        <div className="flex gap-4 items-end">
           <div className="flex flex-col gap-1 flex-1">
             <label className="text-sm font-medium text-text">
               Fecha
@@ -65,7 +63,6 @@ export default function EmployeeDayLookup({
           >
             Buscar
           </button>
-        </div>
 
         {result && (
           <div className="border-t border-border pt-4 text-sm flex flex-col gap-3">
@@ -117,6 +114,5 @@ export default function EmployeeDayLookup({
         )}
 
       </div>
-    </div>
   );
 }

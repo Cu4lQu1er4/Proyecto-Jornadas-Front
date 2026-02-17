@@ -92,7 +92,7 @@ export default function AdminPeriodPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 bg-surface border border-border p-6 rounded-2xl">
       <h1 className="text-h2">Periodos</h1>
 
       <PeriodsTable 

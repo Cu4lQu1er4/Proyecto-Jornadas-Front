@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
-import AdminLayoutShell from "./components/AdminLayoutShell";
 import { cookies } from "next/headers";
+import OnboardingForm from "./components/OnboardingForm";
 
 async function getSession() {
   const cookieStore = await cookies();
@@ -23,28 +23,18 @@ async function getSession() {
   return res.json();
 }
 
-export default async function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function OnboardingPage() {
   const user = await getSession();
 
-  if (!user) {
-    redirect("/login");
+  if (!user) redirect("/login");
+
+  if (user.firstName && user.lastName) {
+    if (user.role === "ADMIN") {
+      redirect("/admin");
+    } else {
+      redirect("/employee");
+    }
   }
 
-  if (!user.firstName || !user.lastName) {
-    redirect("/onboarding");
-  }
-
-  if (user.role !== "ADMIN") {
-    redirect("/employee");
-  }
-
-  return (
-    <AdminLayoutShell user={user}>
-      {children}
-    </AdminLayoutShell>
-  )
+  return <OnboardingForm />;
 }

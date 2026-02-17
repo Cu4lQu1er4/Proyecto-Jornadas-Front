@@ -34,34 +34,28 @@ export default async function EmployeePage({
 
   if (!employee) {
     return (
-      <main className="min-h-screen bg-surface px-6 py-8">
-        <div className="max-w-5xl mx-auto">
-          <div className="bg-white border border-border rounded-2xl p-8 text-center text-text-muted">
-            Empleado no encontrado
-          </div>
-        </div>
-      </main>
+      <div className="bg-white border border-border rounded-2xl p-8 text-center text-text-muted">
+        Empleado no encontrado
+      </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-surface px-6 py-8">
-      <div className="max-w-5xl mx-auto flex flex-col gap-8">
+    <div className="flex flex-col gap-8 bg-surface p-6 border border-border rounded-2xl">
 
-        <header className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold">
-            Detalle del empleado
-          </h1>
-          <p className="text-sm text-text-muted">
-            Información y configuración del usuario
-          </p>
-        </header>
+      <header className="flex flex-col gap-1">
+        <h1 className="text-lg font-semibold text-text">
+          Detalle del empleado
+        </h1>
+        <p className="text-sm text-text-muted">
+          Información y configuración del usuario
+        </p>
+      </header>
 
-        <section className="bg-white border border-border rounded-2xl shadow-sm p-6">
-          <EmployeeDetail employee={employee} />
-        </section>
+      <section className="bg-white border border-border rounded-2xl p-6">
+        <EmployeeDetail employee={employee} />
+      </section>
 
-      </div>
-    </main>
+    </div>
   );
 }

@@ -59,7 +59,7 @@ export default function AdminReportsPage() {
   }, [periodId, documentFilter]);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 bg-surface border border-border p-6 rounded-2xl">
 
       {/* HEADER */}
       <section className="flex flex-col gap-1">

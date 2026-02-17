@@ -1,8 +1,6 @@
 'use client';
 
 import { useEffect, useState, useCallback } from "react";
-import EmployeeLayoutShell from "./components/EmployeeLayoutShell";
-import EmployeeHeader from "./components/EmployeeHeader";
 import PeriodFilter from "./components/PeriodFilter";
 import HistoryList from "./components/HistoryList";
 import CurrentWorkdayCard from "./components/CurrentWorkdayCard";
@@ -21,7 +19,6 @@ export default function EmployeePage() {
   const [selectedPeriod, setSelectedPeriod] = useState<Period | null>(null);
   const [workedTime, setWorkedTime] = useState("0h 0m");
   const [currentPeriodLabel, setCurrentPeriodLabel] = useState("-");
-  const [isClosed, setIsClosed] = useState(false);
 
   const handlePeriodChange = useCallback((period: Period) => {
     setSelectedPeriod(period);
@@ -57,9 +54,7 @@ export default function EmployeePage() {
   }, [selectedPeriod]);
 
   return (
-    <EmployeeLayoutShell header={<EmployeeHeader />}>
-
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-6 p-6">
 
         <CurrentWorkdayCard />
 
@@ -90,7 +85,7 @@ export default function EmployeePage() {
 
 
         {/* === HISTORIAL === */}
-        <section className="bg-white border border-border rounded-2xl p-6 flex flex-col gap-6">
+        <section className="bg-surface border border-border rounded-2xl p-6 flex flex-col gap-6">
 
           <div className="flex flex-col gap-1">
             <h2 className="text-lg font-semibold text-text">
@@ -113,7 +108,5 @@ export default function EmployeePage() {
         </section>
 
       </div>
-
-    </EmployeeLayoutShell>
   );
 }

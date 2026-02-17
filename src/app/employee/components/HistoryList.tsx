@@ -72,7 +72,7 @@ export default function HistoryList({ period, onTotalMinutes }: Props) {
   if (!period) {
     return (
       <p className="text-sm text-text-muted">
-        Selecciona un periodo
+        Selecciona un período
       </p>
     );
   }
@@ -87,16 +87,16 @@ export default function HistoryList({ period, onTotalMinutes }: Props) {
 
   if (error) {
     return (
-      <p className="text-sm text-danger">
+      <div className="bg-danger-soft text-danger rounded-xl px-3 py-2 text-sm">
         {error}
-      </p>
+      </div>
     );
   }
 
   if (items.length === 0) {
     return (
       <p className="text-sm text-text-muted">
-        No hay jornadas en este periodo
+        No hay jornadas en este período
       </p>
     );
   }
@@ -106,7 +106,7 @@ export default function HistoryList({ period, onTotalMinutes }: Props) {
 
       {/* ===== RESUMEN GENERAL ===== */}
       {summary && (
-        <div className="bg-surface border border-border rounded-2xl p-6 flex flex-col gap-4 text-sm">
+        <div className="bg-white border border-border rounded-2xl p-6 flex flex-col gap-4 text-sm">
 
           <div className="flex justify-between">
             <span className="text-text-muted">
@@ -129,7 +129,7 @@ export default function HistoryList({ period, onTotalMinutes }: Props) {
           </div>
 
           <div className="flex justify-between font-medium">
-            <span>
+            <span className="text-text">
               Diferencia
             </span>
 
@@ -166,7 +166,7 @@ export default function HistoryList({ period, onTotalMinutes }: Props) {
             ? "bg-warning-soft text-warning"
             : item.status === "INCOMPLETE"
             ? "bg-danger-soft text-danger"
-            : "bg-surface text-text";
+            : "bg-primary-soft text-primary";
 
         return (
           <div
@@ -174,7 +174,6 @@ export default function HistoryList({ period, onTotalMinutes }: Props) {
             className="bg-white border border-border rounded-2xl p-6 flex flex-col gap-4"
           >
 
-            {/* HEADER */}
             <div className="flex items-center justify-between">
 
               <div className="flex flex-col gap-1">
@@ -200,13 +199,12 @@ export default function HistoryList({ period, onTotalMinutes }: Props) {
               </div>
 
               <span
-                className={`text-xs px-3 py-1 rounded-full ${statusStyle}`}
+                className={`px-3 py-1 rounded-full text-xs font-medium ${statusStyle}`}
               >
                 {item.status ?? "NORMAL"}
               </span>
             </div>
 
-            {/* METRICAS */}
             <div className="flex items-center justify-between text-sm">
 
               <span className="font-medium text-text">
@@ -215,7 +213,9 @@ export default function HistoryList({ period, onTotalMinutes }: Props) {
 
               <span
                 className={
-                  isPositive ? "text-success font-medium" : "text-danger font-medium"
+                  isPositive
+                    ? "text-success font-medium"
+                    : "text-danger font-medium"
                 }
               >
                 {isPositive ? "+" : "-"}
@@ -224,18 +224,17 @@ export default function HistoryList({ period, onTotalMinutes }: Props) {
 
             </div>
 
-            {/* INDICADORES */}
             {(item.lateArrival || item.earlyLeave) && (
               <div className="flex flex-wrap gap-3 text-xs">
 
                 {item.lateArrival && (
-                  <span className="px-3 py-1 rounded-full bg-warning-soft text-warning">
+                  <span className="px-3 py-1 rounded-full text-xs font-medium bg-warning-soft text-warning">
                     Llegada tarde
                   </span>
                 )}
 
                 {item.earlyLeave && (
-                  <span className="px-3 py-1 rounded-full bg-warning-soft text-warning">
+                  <span className="px-3 py-1 rounded-full text-xs font-medium bg-warning-soft text-warning">
                     Salida anticipada
                   </span>
                 )}

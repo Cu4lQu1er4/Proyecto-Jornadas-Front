@@ -52,37 +52,33 @@ export default function EmployeePeriods({
         </p>
       </div>
 
-      <div className="bg-white border border-border rounded-2xl p-5">
+      <select
+        value={selected}
+        onChange={(e) => setSelected(e.target.value)}
+        className="
+          w-full h-11 rounded-xl border border-border
+          px-4 text-sm
+          outline-none
+          focus:ring-2 focus:ring-primary/30
+          bg-background
+        "
+      >
+        <option value="">
+          Selecciona un período
+        </option>
 
-        <select
-          value={selected}
-          onChange={(e) => setSelected(e.target.value)}
-          className="
-            w-full h-11 rounded-xl border border-border
-            px-4 text-sm
-            outline-none
-            focus:ring-2 focus:ring-primary/30
-            bg-background
-          "
-        >
-          <option value="">
-            Selecciona un período
-          </option>
+        {periods.map((p) => {
+          const isClosed = !!p.closedAt;
 
-          {periods.map((p) => {
-            const isClosed = !!p.closedAt;
-
-            return (
-              <option key={p.id} value={p.id}>
-                {new Date(p.startDate).toLocaleDateString()} —{" "}
-                {new Date(p.endDate).toLocaleDateString()}
-                {isClosed ? " (Cerrado)" : ""}
-              </option>
-            );
-          })}
-        </select>
-
-      </div>
+          return (
+            <option key={p.id} value={p.id}>
+              {new Date(p.startDate).toLocaleDateString()} —{" "}
+              {new Date(p.endDate).toLocaleDateString()}
+              {isClosed ? " (Cerrado)" : ""}
+            </option>
+          );
+        })}
+      </select>
 
     </div>
   );

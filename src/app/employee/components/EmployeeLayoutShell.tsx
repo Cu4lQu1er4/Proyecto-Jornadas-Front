@@ -1,19 +1,22 @@
+import EmployeeHeader from "./EmployeeHeader";
+
 type Props = {
-  header: React.ReactNode;
+  user: {
+    firstName?: string;
+    lastName?: string;
+    role: string;
+  };
   children: React.ReactNode;
 };
 
 export default function EmployeeLayoutShell({
-  header,
+  user,
   children,
 }: Props) {
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {header}
-
-      <main className="flex-1 px-6 py-8">
-        {children}
-      </main>
+    <div className="min-h-screen flex flex-col gap-6 p-6 bg-background">
+      <EmployeeHeader user={user} />
+      {children}
     </div>
-  )
+  );
 }

@@ -1,8 +1,7 @@
 import { redirect } from "next/navigation";
 import { getServerUser } from "@/lib/auth-server";
-import EmployeeLayoutShell from "./components/EmployeeLayoutShell";
 
-export default async function EmployeeLayout({
+export default async function ProfileLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -17,13 +16,5 @@ export default async function EmployeeLayout({
     redirect("/onboarding");
   }
 
-  if (user.role !== "EMPLOYEE") {
-    redirect("/admin");
-  }
-
-  return (
-    <EmployeeLayoutShell user={user}>
-      {children}
-    </EmployeeLayoutShell>
-  )
+  return <>{children}</>;
 }

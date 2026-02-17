@@ -48,28 +48,28 @@ export default function PeriodFilter({
 
   function handleSelect(id: string) {
     setSelectedId(id);
-
-    const selected = periods.find(p => p.id === id);
+    const selected = periods.find((p) => p.id === id);
     if (selected) onChange(selected);
   }
 
   if (periods.length === 0) {
     return (
       <p className="text-sm text-text-muted">
-        No hay periodos disponibles
+        No hay períodos disponibles
       </p>
     );
   }
 
+  const selectedPeriod = periods.find((p) => p.id === selectedId);
+
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3">
 
       <label className="text-sm text-text-muted">
-        Periodo
+        Período
       </label>
 
       <div className="relative">
-
         <select
           value={selectedId}
           onChange={(e) => handleSelect(e.target.value)}
@@ -79,17 +79,17 @@ export default function PeriodFilter({
             px-4
             rounded-xl
             border border-border
-            bg-surface
+            bg-background
             text-text
             text-sm
             appearance-none
-            focus:outline-none
+            outline-none
           "
         >
           {periods.map((period) => {
-            const label = `${period.year} - ${
-              period.month
-            } (${period.half === 1 ? "1ra quincena" : "2da quincena"})`;
+            const label = `${period.year} - ${period.month} (${
+              period.half === 1 ? "1ra quincena" : "2da quincena"
+            })`;
 
             return (
               <option key={period.id} value={period.id}>
@@ -98,24 +98,21 @@ export default function PeriodFilter({
             );
           })}
         </select>
-
       </div>
 
-      {/* Estado del periodo */}
-      {selectedId && (
-        <div className="text-xs">
-          {periods.find(p => p.id === selectedId)?.closedAt ? (
-            <span className="px-3 py-1 rounded-full bg-danger-soft text-danger">
-              Periodo cerrado
+      {selectedPeriod && (
+        <div>
+          {selectedPeriod.closedAt ? (
+            <span className="px-3 py-1 rounded-full text-xs font-medium bg-danger-soft text-danger">
+              Período cerrado
             </span>
           ) : (
-            <span className="px-3 py-1 rounded-full bg-success-soft text-success">
-              Periodo abierto
+            <span className="px-3 py-1 rounded-full text-xs font-medium bg-success-soft text-success">
+              Período abierto
             </span>
           )}
         </div>
       )}
-
     </div>
   );
 }

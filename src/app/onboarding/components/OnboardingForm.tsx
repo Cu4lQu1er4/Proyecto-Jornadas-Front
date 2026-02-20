@@ -17,6 +17,8 @@ export default function OnboardingForm() {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [pin, setPin] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const [loading, setLoading] = useState(false);
 
@@ -59,17 +61,28 @@ export default function OnboardingForm() {
       return;
     }
 
+    if (password.length < 0) {
+      toast.error("La contraseña debe tener minimo 6 caracteres");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast.error("Las contraseñas no coinciden");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      await http<{ succcess: true }>("/auth/complete-profile", {
-        method: "POST",
+      await http<{ succcess: true }>("/work/complete-profile", {
+        method: "PATCH",
         body: JSON.stringify({
           firstName: cleanFirstName,
           lastName: cleanLastName,
           phone: cleanPhone,
           email: cleanEmail,
           pin: clearPin,
+          newPassword: password,
         }),
       });
 
@@ -140,6 +153,26 @@ export default function OnboardingForm() {
             value={pin}
             onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
             className="h-11 px-3 rounded-xl border border-border bg-background text-sm text-text outline-none"
+          />
+
+          <input
+            type="password"
+            placeholder="Nueva contraseña"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="
+              h-11 px-3 rounded-xl border border-border bg-background text-sm
+              text-text outline-none"
+          />
+
+          <input
+            type="password"
+            placeholder="Confirmar contraseña"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            className="
+              h-11 px-3 rounded-xl border border-border bg-background text-sm
+              text-text outline-none"
           />
         </div>
 

@@ -1,8 +1,8 @@
 import { http } from "../http";
 
 export const adminCaseApi = {
-  list: (employeeId: string) =>
-    http(`/admin-cases?employeeId=${employeeId}`),
+  list: (employeeId: string, page = 1, limit = 10) =>
+    http(`/admin-cases?employeeId=${employeeId}&page=${page}&limit=${limit}`),
 
   create: (data: any) =>
     http("/admin-cases", {

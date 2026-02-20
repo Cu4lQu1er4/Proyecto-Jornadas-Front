@@ -25,4 +25,20 @@ export const employeeApi = {
 
   myPeriods: () =>
     http("/work/my-periods"),
+
+  create: (data: {
+    document: string;
+    password: string;
+    scheduleTemplateId: string;
+  }) => 
+    http("/work/admin/employees", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  toggleActive: (userId: string, active: boolean) =>
+    http(`/work/users/${userId}/active`, {
+      method: "PATCH",
+      body: JSON.stringify({ active }),
+    }),
 };

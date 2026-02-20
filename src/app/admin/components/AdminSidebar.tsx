@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { UserRound, BookOpen, ListChecks } from "lucide-react";
+import { UserRound, BookOpen, ListChecks, Clock } from "lucide-react";
 
 const items = [
   {
@@ -7,6 +7,12 @@ const items = [
     label: "Empleados",
     color: "bg-success-soft",
     href: "/admin/employees",
+  },
+  {
+    icon: <Clock size={18} />,
+    label: "Horarios",
+    color: "bg-primary-soft",
+    href: "/admin/schedules",
   },
   {
     icon: <BookOpen size={18} />,

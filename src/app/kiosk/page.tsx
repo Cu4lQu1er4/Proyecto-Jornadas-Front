@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 
 type WorkdayStatus = {
   hasOpenWorkday: boolean;
@@ -67,7 +68,7 @@ export default function KioskPage() {
       await fetchStatus();
       setPin("");
     } catch {
-      setError("PIN incorrecto");
+      toast.error("PIN incorrecto");
       setPin("");
     } finally {
       setLoading(false);

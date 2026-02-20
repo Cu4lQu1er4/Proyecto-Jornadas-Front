@@ -26,9 +26,15 @@ async function getSession() {
 export default async function OnboardingPage() {
   const user = await getSession();
 
-  if (!user) redirect("/login");
+  if (!user) {
+    redirect("/login");
+  }
 
-  if (user.firstName && user.lastName) {
+  if (user.mustChangePassword) {
+    redirect("/change-password");
+  }
+
+  if (user.profileCompleted) {
     if (user.role === "ADMIN") {
       redirect("/admin");
     } else {

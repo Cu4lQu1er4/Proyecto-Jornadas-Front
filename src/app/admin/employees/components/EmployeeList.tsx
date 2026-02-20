@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import CreateEmployeeModal from "./CreateEmployeeModal";
 
 type Employee = {
   id: string;
@@ -16,6 +17,7 @@ type Employee = {
 export default function EmployeeList({ employees }: { employees: Employee[] }) {
   const router = useRouter();
   const [q, setQ] = useState("");
+  const [open, setOpen] = useState(false);
 
   const filtered = useMemo(() => {
     const t = q.trim().toLowerCase();
@@ -30,6 +32,12 @@ export default function EmployeeList({ employees }: { employees: Employee[] }) {
 
   return (
     <div className="flex flex-col gap-6">
+      <button
+        onClick={() => setOpen(true)}
+        className="h-10 px-4 rounded-xl bg-primary text-white text-sm"
+      >
+        Nuevo empleado
+      </button>
 
       {/* Header */}
       <div className="flex items-center justify-between gap-4">
@@ -102,6 +110,13 @@ export default function EmployeeList({ employees }: { employees: Employee[] }) {
           <div className="py-16 text-center text-sm text-text-muted">
             No hay resultados
           </div>
+        )}
+
+        {open && (
+          <CreateEmployeeModal
+            onClose={() => setOpen(false)}
+            onCreated={() => window.location.reload()}
+          />
         )}
 
       </div>

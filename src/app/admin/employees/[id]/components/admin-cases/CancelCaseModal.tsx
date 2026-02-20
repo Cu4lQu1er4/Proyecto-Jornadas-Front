@@ -27,7 +27,7 @@ export default function CancelCaseModal({
 
       await adminCaseApi.cancel(caseId, reason);
 
-      toast.success("Caso cancelado correctamente");
+      console.log("Caso cancelado correctamente");
 
       onSuccess();
       onClose();

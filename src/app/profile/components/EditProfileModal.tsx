@@ -1,25 +1,32 @@
 'use client';
 
 import { useState } from "react";
-import { toast } from "sonner";
 import { http } from "@/lib/http";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 type Props = {
   open: boolean;
   onClose: () => void;
+  user: {
+    firstName?: string;
+    lastName?: string;
+    email?: string | null;
+    phone?: string | null;
+  };
 };
 
-function isWeakPin(pin: string) {
-  return ["0000", "1111", "1234", "2222", "3333"].includes(pin);
-}
-
-export default function ChangePinModal({
+export default function EditProfileModal({
   open,
   onClose,
+  user,
 }: Props) {
-  const [currentPin, setCurrentPin] = useState("");
-  const [newPin, setNewPin] = useState("");
-  const [confirmPin, setConfirmPin] = useState("");
+  const router = useRouter();
+
+  const [firstName, setFirstName] = useState(user.firstName || "");
+  const [lastName, setLastName] = useState(user.lastName || "");
+  const [email, setEmail] = useState(user.email || "");
+  const [phone, setPhone] = useState(user.phone || "");
   const [loading, setLoading] = useState(false);
 
   if (!open) return null;
@@ -28,43 +35,45 @@ export default function ChangePinModal({
     e.preventDefault();
     if (loading) return;
 
-    const cleanNewPin = newPin.replace(/\D/g, "");
-    const cleanCurrentPin = currentPin.replace(/\D/g, "");
+    const cleanFirstName = firstName.trim();
+    const cleanLastName = lastName.trim();
+    const cleanEmail = email.trim();
+    const cleanPhone = phone.trim();
 
-    if (!/^\d{4}$/.test(cleanNewPin)) {
-      toast.error("El PIN debe tener 4 dígitos numéricos");
+    if (!cleanFirstName) {
+      toast.error("Nombre obligatorio");
       return;
     }
 
-    if (isWeakPin(cleanNewPin)) {
-      toast.error("PIN demasiado inseguro");
+    if (!cleanLastName) {
+      toast.error("Apellido obligatorio");
       return;
     }
 
-    if (cleanNewPin !== confirmPin) {
-      toast.error("Los PIN no coinciden");
+    if (cleanEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+      toast.error("Correo inválido");
       return;
     }
 
     setLoading(true);
 
     try {
-      await http("/auth/change-pin", {
+      await http("/auth/profile", {
         method: "PATCH",
         body: JSON.stringify({
-          currentPin: cleanCurrentPin || undefined,
-          newPin: cleanNewPin,
+          firstName: cleanFirstName,
+          lastName: cleanLastName,
+          email: cleanEmail || null,
+          phone: cleanPhone || null,
         }),
       });
 
-      toast.success("PIN actualizado correctamente");
+      toast.success("Perfil actualizado correctamente");
 
-      setCurrentPin("");
-      setNewPin("");
-      setConfirmPin("");
+      router.refresh();
       onClose();
     } catch (error: any) {
-      toast.error(error?.message || "No se pudo actualizar el PIN");
+      toast.error(error?.message || "No se pudo actualizar");
     } finally {
       setLoading(false);
     }
@@ -76,51 +85,44 @@ export default function ChangePinModal({
 
         <header>
           <h2 className="text-lg font-semibold text-text">
-            Cambiar PIN
+            Editar perfil
           </h2>
           <p className="text-sm text-text-muted">
-            El PIN debe tener 4 dígitos numéricos
+            Actualiza tu información personal
           </p>
         </header>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
 
-          {/* PIN actual */}
           <input
-            type="password"
-            maxLength={4}
-            inputMode="numeric"
-            placeholder="PIN actual"
-            value={currentPin}
-            onChange={(e) =>
-              setCurrentPin(e.target.value.replace(/\D/g, ""))
-            }
+            type="text"
+            placeholder="Nombre"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
             className="h-11 px-3 rounded-xl border border-border bg-background text-sm text-text outline-none"
           />
 
-          {/* Nuevo PIN */}
           <input
-            type="password"
-            maxLength={4}
-            inputMode="numeric"
-            placeholder="Nuevo PIN"
-            value={newPin}
-            onChange={(e) =>
-              setNewPin(e.target.value.replace(/\D/g, ""))
-            }
+            type="text"
+            placeholder="Apellido"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
             className="h-11 px-3 rounded-xl border border-border bg-background text-sm text-text outline-none"
           />
 
-          {/* Confirmar */}
           <input
-            type="password"
-            maxLength={4}
-            inputMode="numeric"
-            placeholder="Confirmar PIN"
-            value={confirmPin}
-            onChange={(e) =>
-              setConfirmPin(e.target.value.replace(/\D/g, ""))
-            }
+            type="email"
+            placeholder="Correo"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="h-11 px-3 rounded-xl border border-border bg-background text-sm text-text outline-none"
+          />
+
+          <input
+            type="text"
+            placeholder="Teléfono"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
             className="h-11 px-3 rounded-xl border border-border bg-background text-sm text-text outline-none"
           />
 
@@ -139,7 +141,7 @@ export default function ChangePinModal({
               disabled={loading}
               className="h-10 px-4 rounded-xl bg-primary text-white text-sm font-medium transition hover:opacity-90 disabled:opacity-60"
             >
-              {loading ? "Guardando..." : "Guardar PIN"}
+              {loading ? "Guardando..." : "Guardar cambios"}
             </button>
 
           </div>

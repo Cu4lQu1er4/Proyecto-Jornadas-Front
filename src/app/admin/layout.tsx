@@ -34,7 +34,7 @@ export default async function AdminLayout({
     redirect("/login");
   }
 
-  if (!user.firstName || !user.lastName) {
+  if (user.mustChangePassword) {
     redirect("/onboarding");
   }
 

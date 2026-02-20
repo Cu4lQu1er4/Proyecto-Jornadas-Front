@@ -13,7 +13,7 @@ export default async function EmployeeLayout({
     redirect("/login");
   }
 
-  if (!user.firstName || !user.lastName || !user.hasPin) {
+  if (user.profileCompleted) {
     redirect("/onboarding");
   }
 

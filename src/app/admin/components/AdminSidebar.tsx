@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { UserRound, BookOpen, ListChecks, Clock } from "lucide-react";
 
+type Props = {
+  onNavigate?: () => void;
+};
+
 const items = [
   {
     icon: <UserRound size={18} />,

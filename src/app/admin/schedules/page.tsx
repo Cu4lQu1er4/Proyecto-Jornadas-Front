@@ -13,7 +13,7 @@ export default function SchedulePage() {
   async function load() {
     try {
       setLoading(true);
-      const data = await scheduleApi.list();
+      const data: any = await scheduleApi.list();
       setTemplates(data);
     } finally {
       setLoading(false);

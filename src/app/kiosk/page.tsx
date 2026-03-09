@@ -137,7 +137,7 @@ export default function KioskPage() {
     if (!kioskToken) return;
 
     try {
-      const res = await http("/kiosk/status", {
+      const res: any = await http("/kiosk/status", {
         headers: {
           Authorization: `Bearer ${kioskToken}`,
         },

@@ -19,7 +19,7 @@ export default function AdminCaseSection({ employeeId }: Props) {
 
   async function loadCases(currentPage = page) {
     try {
-      const res = await adminCaseApi.list(employeeId, currentPage, 5);
+      const res: any = await adminCaseApi.list(employeeId, currentPage, 5);
 
       setCases(res.data);
       setMeta(res.meta);

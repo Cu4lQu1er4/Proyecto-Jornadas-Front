@@ -1,3 +1,12 @@
+type Status =
+  | "NORMAL"
+  | "JUSTIFIED"
+  | "PARTIALLY_UNJUSTIFIED"
+  | "UNJUSTIFIED_ABSENCE"
+  | "INCAPACITY"
+  | "CONFLICT"
+  | "NON_OPERATIONAL_DAY";
+
 export default function StatusBadge({
   status,
 }: {

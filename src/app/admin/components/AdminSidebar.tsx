@@ -32,7 +32,7 @@ const items = [
   },
 ];
 
-export default function AdminSidebar() {
+export default function AdminSidebar({ onNavigate }: Props) {
   return (
     <aside
       className="

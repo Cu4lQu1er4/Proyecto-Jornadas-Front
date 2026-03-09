@@ -206,7 +206,7 @@ export default function AdminPeriodPage() {
 
         <div className="bg-white border border-border rounded-2xl p-4 sm:p-6">
           <PeriodsTable
-            periods={periods}
+            periods={periods as any}
             onClose={(id) =>
               setToClose(periods.find((p) => p.id === id) ?? null)
             }

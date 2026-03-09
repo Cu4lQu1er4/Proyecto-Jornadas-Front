@@ -29,7 +29,7 @@ export default function CreateEmployeeModal({
   useEffect(() => {
     async function loadTemplates() {
       try {
-        const data = await scheduleApi.list();
+        const data: Template[] = await scheduleApi.list() as Template[];
         setTemplates(data);
       } catch {
         toast.error("No se pudieron cargar los horarios");

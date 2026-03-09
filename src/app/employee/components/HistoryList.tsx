@@ -48,7 +48,7 @@ export default function HistoryList({ period, onTotalMinutes }: Props) {
           summary: HistorySummary;
         }>(
           `/work/history?from=${encodeURIComponent(
-            period?.startDate
+            period.startDate
           )}&to=${encodeURIComponent(period.endDate)}`
         );
         

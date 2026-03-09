@@ -60,7 +60,7 @@ export default function EmployeeDetail({ employee }: { employee: Employee }) {
 
   async function handleResetPin() {
     try {
-      const res = await userAdminApi.resetPin(employee.id);
+      const res: any = await userAdminApi.resetPin(employee.id);
       setTempPin(res.temporaryPin);
     } catch (error: any) {
       toast.error(error?.message || "No se pudo resetear el PIN");

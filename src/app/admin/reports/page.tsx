@@ -40,7 +40,7 @@ export default function AdminReportsPage() {
 
     try {
       setLoading(true);
-      const res = await reportsApi.getSummary(
+      const res: any = await reportsApi.getSummary(
         periodId,
         documentFilter || undefined
       );

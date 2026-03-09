@@ -9,7 +9,7 @@ async function getEmployee(id: string) {
   if (!token) return null;
 
   try {
-    const list = await http('/work/admin/employees', {
+    const list: any[] = await http('/work/admin/employees', {
       headers: {
         Cookie: `access_token=${token.value}`,
       },

@@ -26,7 +26,7 @@ export default function PeriodSelect({
       try {
         setLoading(true);
 
-        const res = await reportsApi.getPeriods();
+        const res: any = await reportsApi.getPeriods();
 
         setPeriods(res.items ?? []);
       } catch {

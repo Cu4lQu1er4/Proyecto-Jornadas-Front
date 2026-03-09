@@ -73,7 +73,7 @@ export default function KioskPage() {
       setLoading(true);
       setError(null);
 
-      const res = await http("/kiosk/auth", {
+      const res: any = await http("/kiosk/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ document, pin: pinValue }),

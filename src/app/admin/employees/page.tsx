@@ -13,7 +13,7 @@ async function getEmployees() {
         Cookie: `access_token=${token.value}`,
       },
       cache: "no-store",
-    });
+    }) as Employee[];
 
     return employees;
   } catch (error) {

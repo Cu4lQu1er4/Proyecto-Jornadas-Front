@@ -24,7 +24,7 @@ export default function LoginForm() {
     try {
       setLoading(true);
 
-      const response = await authApi.login(document, password);
+      const response: any = await authApi.login(document, password);
 
       if (response.needsOnboarding) {
         router.replace("/onboarding");

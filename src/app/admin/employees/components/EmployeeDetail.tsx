@@ -51,7 +51,7 @@ export default function EmployeeDetail({ employee }: { employee: Employee }) {
 
   async function handleResetPassword() {
     try {
-      const res = await userAdminApi.resetPassword(employee.id);
+      const res: any = await userAdminApi.resetPassword(employee.id);
       setTempPassword(res.temporaryPassword);
     } catch (error: any) {
       toast.error(error?.message || "No se pudo resetear la contraseña");

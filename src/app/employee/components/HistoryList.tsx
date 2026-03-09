@@ -48,8 +48,8 @@ export default function HistoryList({ period, onTotalMinutes }: Props) {
           summary: HistorySummary;
         }>(
           `/work/history?from=${encodeURIComponent(
-            period.startDate
-          )}&to=${encodeURIComponent(period.endDate)}`
+            period!.startDate
+          )}&to=${encodeURIComponent(period!.endDate)}`
         );
         
         setItems(data.entries ?? []);

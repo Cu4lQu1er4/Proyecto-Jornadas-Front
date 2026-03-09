@@ -28,7 +28,7 @@ export default function EmployeePeriods({
       try {
         const data = await http(
           `/work/admin/employees/${employeeId}/periods`
-        );
+        ) as Period[];
 
         setPeriods(data ?? []);
       } catch (error) {

@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import EmployeeDetail from "../components/EmployeeDetail"
+import { http } from "@/lib/http";
 
 async function getEmployee(id: string) {
   const cookieStore = await cookies();
@@ -7,20 +8,19 @@ async function getEmployee(id: string) {
 
   if (!token) return null;
 
-  const res = await fetch(
-    'http://localhost:3001/api/work/admin/employees',
-    {
+  try {
+    const list = await http('/work/admin/employees', {
       headers: {
         Cookie: `access_token=${token.value}`,
       },
       cache: "no-store",
-    }
-  );
+    });
 
-  if (!res.ok) return null;
-
-  const list = await res.json();
-  return list.find((e: any) => e.id === id) ?? null;
+    return list.find((e: any) => e.id === id) ?? null;
+  } catch (error) {
+    console.error("Employee load error:", error);
+    return null;
+  }
 }
 
 export default async function EmployeePage({

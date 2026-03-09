@@ -1,24 +1,25 @@
 import { cookies } from "next/headers";
 import EmployeeList from "./components/EmployeeList";
+import { http } from "@/lib/http";
 
 async function getEmployees() {
   const cookieStore = await cookies();
   const token = cookieStore.get("access_token");
 
   if (!token) return [];
-
-  const res = await fetch(
-    "http://localhost:3001/api/work/admin/employees",
-    {
+  try {
+    const employees = await http("/work/admin/employees",{
       headers: {
         Cookie: `access_token=${token.value}`,
       },
       cache: "no-store",
-    }
-  );
+    });
 
-  if (!res.ok) return [];
-  return res.json();
+    return employees;
+  } catch (error) {
+    console.error("Error cargando employees:", error);
+    return[];
+  }
 }
 
 export default async function AdminEmployeesPage() {

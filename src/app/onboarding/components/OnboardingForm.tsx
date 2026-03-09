@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { http } from "@/lib/http";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
 
 function isWeakPin(pin: string) {
   return ["0000", "1111", "1234", "2222", "3333"].includes(pin);
@@ -30,7 +31,7 @@ export default function OnboardingForm() {
     const cleanLastName = lastName.trim();
     const cleanPhone = phone.trim();
     const cleanEmail = email.trim();
-    const clearPin = pin.replace(/\D/g, "");
+    const cleanPin = pin.replace(/\D/g, "");
 
     if (!cleanFirstName) {
       toast.error("Nombre es obligatorio");
@@ -39,30 +40,31 @@ export default function OnboardingForm() {
 
     if (!cleanLastName) {
       toast.error("Apellido es obligatorio");
+      return;
     }
 
     if (!cleanPhone || cleanPhone.length < 10) {
-      toast.error("Telefono invalido");
+      toast.error("Teléfono inválido");
       return;
     }
 
     if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
-      toast.error("Correo invalido");
+      toast.error("Correo inválido");
       return;
     }
 
-    if (!/^\d{4}$/.test(clearPin)) {
-      toast.error("PIN debe ser de 4 digitos");
+    if (!/^\d{4}$/.test(cleanPin)) {
+      toast.error("PIN debe ser de 4 dígitos");
       return;
     }
 
-    if (isWeakPin(clearPin)) {
+    if (isWeakPin(cleanPin)) {
       toast.error("PIN demasiado inseguro");
       return;
     }
 
-    if (password.length < 0) {
-      toast.error("La contraseña debe tener minimo 6 caracteres");
+    if (password.length < 6) {
+      toast.error("La contraseña debe tener mínimo 6 caracteres");
       return;
     }
 
@@ -74,22 +76,21 @@ export default function OnboardingForm() {
     setLoading(true);
 
     try {
-      await http<{ succcess: true }>("/work/complete-profile", {
+      await http("/work/complete-profile", {
         method: "PATCH",
         body: JSON.stringify({
           firstName: cleanFirstName,
           lastName: cleanLastName,
           phone: cleanPhone,
           email: cleanEmail,
-          pin: clearPin,
+          pin: cleanPin,
           newPassword: password,
         }),
       });
 
       toast.success("Perfil configurado correctamente");
 
-      router.refresh();
-      router.push("/employee");
+      router.refresh(); // deja que el server redirija según rol
     } catch (error: any) {
       toast.error(error?.message || "No se pudo completar el perfil");
     } finally {
@@ -99,26 +100,30 @@ export default function OnboardingForm() {
 
   return (
     <main className="min-h-screen flex items-center justify-center px-4 bg-background">
-      <form
+      <motion.form
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25 }}
         onSubmit={handleSubmit}
-        className="w-full max-w-md bg-white border border-border rounded-2xl p-6 flex flex-col gap-6"
+        className="w-full max-w-md bg-white border border-border rounded-2xl p-6 flex flex-col gap-6 shadow-sm"
       >
         <header className="flex flex-col gap-1">
           <h1 className="text-lg font-semibold text-text">
             Completar perfil
           </h1>
           <p className="text-sm text-text-muted">
-            Configura tu informacion y crea tu PIN
+            Configura tu información y crea tu PIN
           </p>
         </header>
 
         <div className="flex flex-col gap-4">
+
           <input
             type="text"
             placeholder="Nombre"
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
-            className="h-11 px-3 rounded-xl border border-border bg-background text-sm text-text outline-none"
+            className="h-11 px-3 rounded-xl border border-border bg-background text-sm text-text outline-none focus:ring-2 focus:ring-primary"
           />
 
           <input
@@ -126,15 +131,15 @@ export default function OnboardingForm() {
             placeholder="Apellido"
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
-            className="h-11 px-3 rounded-xl border border-border bg-background text-sm text-text outline-none"
+            className="h-11 px-3 rounded-xl border border-border bg-background text-sm text-text outline-none focus:ring-2 focus:ring-primary"
           />
 
           <input
             type="text"
-            placeholder="Telefono"
+            placeholder="Teléfono"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            className="h-11 px-3 rounded-xl border border-border bg-background text-sm text-text outline-none"
+            className="h-11 px-3 rounded-xl border border-border bg-background text-sm text-text outline-none focus:ring-2 focus:ring-primary"
           />
 
           <input
@@ -142,17 +147,17 @@ export default function OnboardingForm() {
             placeholder="Correo"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="h-11 px-3 rounded-xl border border-border bg-background text-sm text-text outline-none"
+            className="h-11 px-3 rounded-xl border border-border bg-background text-sm text-text outline-none focus:ring-2 focus:ring-primary"
           />
 
           <input
-            type="text"
+            type="password"
             inputMode="numeric"
             maxLength={4}
-            placeholder="PIN (4 digitos)"
+            placeholder="PIN (4 dígitos)"
             value={pin}
             onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
-            className="h-11 px-3 rounded-xl border border-border bg-background text-sm text-text outline-none"
+            className="h-11 px-3 rounded-xl border border-border bg-background text-sm text-text outline-none focus:ring-2 focus:ring-primary"
           />
 
           <input
@@ -160,9 +165,7 @@ export default function OnboardingForm() {
             placeholder="Nueva contraseña"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="
-              h-11 px-3 rounded-xl border border-border bg-background text-sm
-              text-text outline-none"
+            className="h-11 px-3 rounded-xl border border-border bg-background text-sm text-text outline-none focus:ring-2 focus:ring-primary"
           />
 
           <input
@@ -170,20 +173,19 @@ export default function OnboardingForm() {
             placeholder="Confirmar contraseña"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            className="
-              h-11 px-3 rounded-xl border border-border bg-background text-sm
-              text-text outline-none"
+            className="h-11 px-3 rounded-xl border border-border bg-background text-sm text-text outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
 
-        <button
+        <motion.button
+          whileTap={{ scale: 0.97 }}
           type="submit"
           disabled={loading}
-          className="h-10 px-4 rounded-xl bg-primary text-white text-sm font-medium transition hover:opacity-90 disabled:opacity-60"
+          className="h-11 rounded-xl bg-primary text-white text-sm font-medium transition hover:opacity-90 disabled:opacity-60"
         >
           {loading ? "Guardando..." : "Guardar"}
-        </button>
-      </form>
+        </motion.button>
+      </motion.form>
     </main>
   );
 }

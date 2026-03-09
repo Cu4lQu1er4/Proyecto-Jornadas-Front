@@ -1,9 +1,12 @@
 'use client';
 
 import { useEffect, useState, useCallback } from "react";
+import { motion } from "framer-motion";
 import PeriodFilter from "./components/PeriodFilter";
 import HistoryList from "./components/HistoryList";
 import CurrentWorkdayCard from "./components/CurrentWorkdayCard";
+import Link from "next/link";
+import { FileText } from "lucide-react";
 
 type Period = {
   id: string;
@@ -54,40 +57,90 @@ export default function EmployeePage() {
   }, [selectedPeriod]);
 
   return (
-      <div className="flex flex-col gap-6 p-6">
+    <main className="min-h-[100dvh] bg-background px-4 sm:px-6 py-8">
+      <div className="max-w-6xl mx-auto flex flex-col gap-8">
 
-        <CurrentWorkdayCard />
+        {/* CURRENT WORKDAY */}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <CurrentWorkdayCard />
+        </motion.div>
 
-        {/* === RESUMEN SUPERIOR === */}
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* RESUMEN GRID */}
+        <motion.section
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.2, delay: 0.05 }}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+        >
+          {/* Horas trabajadas */}
+          <SummaryCard
+            label="Horas trabajadas"
+            value={workedTime}
+          />
 
-          <div className="bg-white border border-border rounded-2xl p-6 flex flex-col gap-2">
-            <span className="text-sm text-text-muted">
-              Horas trabajadas
-            </span>
+          {/* Periodo actual */}
+          <SummaryCard
+            label="Periodo actual"
+            value={currentPeriodLabel}
+          />
 
-            <span className="text-lg font-semibold text-text">
-              {workedTime}
-            </span>
-          </div>
+          {/* Solicitudes */}
+          <motion.div
+            whileHover={{ y: -4 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ type: "spring", stiffness: 250 }}
+          >
+            <Link
+              href="/employee/admin-cases"
+              className="
+                relative
+                bg-primary-soft border border-primary/30
+                rounded-2xl p-6
+                flex flex-col gap-4
+                hover:shadow-md hover:border-primary
+                transition
+              "
+            >
+              {/* ICONO + TÍTULO */}
+              <div className="flex items-center justify-between">
 
-          <div className="bg-white border border-border rounded-2xl p-6 flex flex-col gap-2">
-            <span className="text-sm text-text-muted">
-              Periodo actual
-            </span>
+                <div className="flex items-center gap-3">
+                  <div className="bg-primary/20 p-3 rounded-xl">
+                    <FileText className="w-5 h-5 text-primary" />
+                  </div>
 
-            <span className="text-lg font-semibold text-text">
-              {currentPeriodLabel}
-            </span>
-          </div>
+                  <div className="flex flex-col">
+                    <span className="text-sm text-primary font-medium">
+                      Gestionar
+                    </span>
 
-        </section>
+                    <span className="text-lg font-semibold text-text">
+                      Solicitudes administrativas
+                    </span>
+                  </div>
+                </div>
 
+                <span className="text-primary text-lg font-semibold">
+                  →
+                </span>
+              </div>
 
-        {/* === HISTORIAL === */}
-        <section className="bg-surface border border-border rounded-2xl p-6 flex flex-col gap-6">
+              <span className="text-xs text-text-muted">
+                Permisos, incapacidades y justificaciones
+              </span>
 
-          <div className="flex flex-col gap-1">
+            </Link>
+          </motion.div>
+        </motion.section>
+
+        {/* HISTORIAL */}
+        <section className="bg-surface border border-border rounded-2xl p-4 sm:p-6 flex flex-col gap-6">
+
+          <div>
             <h2 className="text-lg font-semibold text-text">
               Historial de asistencia
             </h2>
@@ -98,7 +151,7 @@ export default function EmployeePage() {
 
           <PeriodFilter onChange={handlePeriodChange} />
 
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex flex-col gap-4 max-h-[60vh] overflow-y-auto">
             <HistoryList
               period={selectedPeriod}
               onTotalMinutes={handleTotalMinutes}
@@ -108,5 +161,30 @@ export default function EmployeePage() {
         </section>
 
       </div>
+    </main>
+  );
+}
+
+function SummaryCard({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <motion.div
+      whileHover={{ y: -3 }}
+      transition={{ type: "spring", stiffness: 250 }}
+      className="bg-white border border-border rounded-2xl p-6 flex flex-col gap-2"
+    >
+      <span className="text-sm text-text-muted">
+        {label}
+      </span>
+
+      <span className="text-xl font-semibold text-text">
+        {value}
+      </span>
+    </motion.div>
   );
 }

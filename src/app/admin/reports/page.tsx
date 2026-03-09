@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { reportsApi } from "@/lib/api/reports.api";
 import { toast } from "sonner";
 import PeriodSelect from "./components/PeriodSelect";
@@ -39,12 +40,10 @@ export default function AdminReportsPage() {
 
     try {
       setLoading(true);
-
       const res = await reportsApi.getSummary(
         periodId,
         documentFilter || undefined
       );
-
       setData(res);
     } catch {
       toast.error("Error cargando reporte");
@@ -59,155 +58,211 @@ export default function AdminReportsPage() {
   }, [periodId, documentFilter]);
 
   return (
-    <div className="flex flex-col gap-6 bg-surface border border-border p-6 rounded-2xl">
+    <main className="min-h-[100dvh] bg-surface px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-6xl mx-auto flex flex-col gap-8">
 
-      {/* HEADER */}
-      <section className="flex flex-col gap-1">
-        <h1 className="text-lg font-semibold text-text">
-          Reportes de asistencia
-        </h1>
-        <p className="text-sm text-text-muted">
-          Resumen general por periodo
-        </p>
-      </section>
+        {/* HEADER */}
+        <motion.section
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
+          className="flex flex-col gap-1"
+        >
+          <h1 className="text-2xl font-semibold text-text">
+            Reportes de asistencia
+          </h1>
+          <p className="text-sm text-text-muted">
+            Resumen general por periodo
+          </p>
+        </motion.section>
 
-      {/* FILTROS */}
-      <section className="bg-white border border-border rounded-2xl p-6 flex flex-col gap-6">
+        {/* FILTROS */}
+        <section className="bg-white border border-border rounded-2xl p-4 sm:p-6 flex flex-col gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-          <PeriodSelect
-            value={periodId}
-            onChange={setPeriodId}
-          />
-
-          <div className="flex flex-col gap-2">
-            <label className="text-sm text-text">
-              Filtrar por documento (opcional)
-            </label>
-
-            <input
-              value={documentFilter}
-              onChange={(e) => setDocumentFilter(e.target.value)}
-              placeholder="EMP-2"
-              className="h-11 px-4 rounded-xl border border-border bg-surface text-text text-sm focus:outline-none"
+            <PeriodSelect
+              value={periodId}
+              onChange={setPeriodId}
             />
+
+            <div className="flex flex-col gap-2">
+              <label className="text-sm text-text">
+                Filtrar por documento (opcional)
+              </label>
+
+              <input
+                value={documentFilter}
+                onChange={(e) => setDocumentFilter(e.target.value)}
+                placeholder="EMP-2"
+                className="
+                  h-11 px-4 rounded-xl
+                  border border-border
+                  bg-surface text-text text-sm
+                  focus:outline-none focus:ring-2 focus:ring-primary
+                "
+              />
+            </div>
+
           </div>
+        </section>
 
-        </div>
+        {loading && (
+          <div className="text-sm text-text-muted">
+            Cargando reporte...
+          </div>
+        )}
 
-      </section>
+        {data && !loading && (
+          <>
+            {/* RESUMEN */}
+            <motion.section
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+            >
+              <SummaryCard
+                label="Total empleados"
+                value={data.totalEmployees}
+              />
 
-      {/* LOADING */}
-      {loading && (
-        <div className="text-sm text-text-muted">
-          Cargando reporte...
-        </div>
-      )}
+              <SummaryCard
+                label="Inasistencias"
+                value={data.totalAbsences}
+                danger
+              />
 
-      {/* RESUMEN */}
-      {data && !loading && (
-        <>
-          <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <SummaryCard
+                label="Justificaciones"
+                value={data.totalJustified}
+                warning
+              />
+            </motion.section>
 
-            <div className="bg-white border border-border rounded-2xl p-6 flex flex-col gap-2">
-              <span className="text-sm text-text-muted">
-                Total empleados
-              </span>
-              <span className="text-lg font-semibold text-text">
-                {data.totalEmployees}
-              </span>
-            </div>
+            {/* DETALLE */}
+            <section className="bg-white border border-border rounded-2xl p-4 sm:p-6 flex flex-col gap-6">
 
-            <div className="bg-white border border-border rounded-2xl p-6 flex flex-col gap-2">
-              <span className="text-sm text-text-muted">
-                Inasistencias
-              </span>
-              <span className="text-lg font-semibold text-danger">
-                {data.totalAbsences}
-              </span>
-            </div>
-
-            <div className="bg-white border border-border rounded-2xl p-6 flex flex-col gap-2">
-              <span className="text-sm text-text-muted">
-                Justificaciones
-              </span>
-              <span className="text-lg font-semibold text-warning">
-                {data.totalJustified}
-              </span>
-            </div>
-
-          </section>
-
-          {/* DETALLE */}
-          <section className="bg-white border border-border rounded-2xl p-6 flex flex-col gap-6">
-
-            <div className="flex flex-col gap-1">
-              <h2 className="text-lg font-semibold text-text">
-                Detalle por empleado
-              </h2>
-              <p className="text-sm text-text-muted">
-                Datos individuales del periodo seleccionado
-              </p>
-            </div>
-
-            {data.rows.length === 0 ? (
-              <div className="text-sm text-text-muted">
-                No hay empleados para este filtro
+              <div>
+                <h2 className="text-lg font-semibold text-text">
+                  Detalle por empleado
+                </h2>
+                <p className="text-sm text-text-muted">
+                  Datos individuales del periodo seleccionado
+                </p>
               </div>
-            ) : (
-              <div className="flex flex-col gap-4">
 
-                {data.rows.map((row) => (
-                  <div
-                    key={row.employeeId}
-                    className="border border-border rounded-xl p-4 flex justify-between items-center text-sm"
-                  >
+              {data.rows.length === 0 ? (
+                <div className="text-sm text-text-muted">
+                  No hay empleados para este filtro
+                </div>
+              ) : (
+                <div className="flex flex-col gap-4">
+                  {data.rows.map((row) => (
+                    <motion.div
+                      key={row.employeeId}
+                      whileHover={{ y: -2 }}
+                      whileTap={{ scale: 0.99 }}
+                      transition={{ type: "spring", stiffness: 250 }}
+                      className="
+                        border border-border rounded-xl p-4
+                        flex flex-col gap-4
+                        lg:flex-row lg:justify-between lg:items-center
+                      "
+                    >
+                      {/* INFO */}
+                      <div className="flex flex-col gap-1">
+                        <span className="font-medium text-text">
+                          {row.document}
+                        </span>
 
-                    {/* INFO */}
-                    <div className="flex flex-col gap-1">
-                      <span className="font-medium text-text">
-                        {row.document}
-                      </span>
+                        <span className="text-text-muted text-xs">
+                          Trabajado: {formatMinutes(row.workedMinutes)}
+                        </span>
+                      </div>
 
-                      <span className="text-text-muted text-xs">
-                        Trabajado: {formatMinutes(row.workedMinutes)}
-                      </span>
-                    </div>
+                      {/* METRICAS */}
+                      <div className="
+                        flex flex-wrap gap-2
+                        lg:items-center
+                      ">
+                        <Badge danger>
+                          Inasistencias: {row.absences}
+                        </Badge>
 
-                    {/* METRICAS */}
-                    <div className="flex items-center gap-4">
+                        <Badge warning>
+                          Justificado: {row.justified}
+                        </Badge>
 
-                      <span className="bg-danger-soft text-danger px-3 py-1 rounded-full text-xs">
-                        Inasistencias: {row.absences}
-                      </span>
+                        <Badge
+                          success={row.status !== "IRREGULAR"}
+                          danger={row.status === "IRREGULAR"}
+                        >
+                          {row.status}
+                        </Badge>
+                      </div>
 
-                      <span className="bg-warning-soft text-warning px-3 py-1 rounded-full text-xs">
-                        Justificado: {row.justified}
-                      </span>
-
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs ${
-                          row.status === "IRREGULAR"
-                            ? "bg-danger-soft text-danger"
-                            : "bg-success-soft text-success"
-                        }`}
-                      >
-                        {row.status}
-                      </span>
-
-                    </div>
-
-                  </div>
-                ))}
-
-              </div>
-            )}
-
-          </section>
-        </>
-      )}
-
-    </div>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </section>
+          </>
+        )}
+      </div>
+    </main>
   );
+}
+
+function SummaryCard({
+  label,
+  value,
+  danger,
+  warning,
+}: {
+  label: string;
+  value: number;
+  danger?: boolean;
+  warning?: boolean;
+}) {
+  return (
+    <motion.div
+      whileHover={{ y: -3 }}
+      transition={{ type: "spring", stiffness: 250 }}
+      className="bg-white border border-border rounded-2xl p-6 flex flex-col gap-2"
+    >
+      <span className="text-sm text-text-muted">
+        {label}
+      </span>
+
+      <span
+        className={`text-xl font-semibold ${
+          danger
+            ? "text-danger"
+            : warning
+            ? "text-warning"
+            : "text-text"
+        }`}
+      >
+        {value}
+      </span>
+    </motion.div>
+  );
+}
+
+function Badge({
+  children,
+  danger,
+  warning,
+  success,
+}: any) {
+  const base = "px-3 py-1 rounded-full text-xs font-medium";
+
+  const color = danger
+    ? "bg-danger-soft text-danger"
+    : warning
+    ? "bg-warning-soft text-warning"
+    : success
+    ? "bg-success-soft text-success"
+    : "bg-surface text-text";
+
+  return <span className={`${base} ${color}`}>{children}</span>;
 }

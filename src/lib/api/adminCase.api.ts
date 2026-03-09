@@ -1,23 +1,36 @@
 import { http } from "../http";
 
 export const adminCaseApi = {
-  list: (employeeId: string, page = 1, limit = 10) =>
-    http(`/admin-cases?employeeId=${employeeId}&page=${page}&limit=${limit}`),
+  list: (employeeId: string, page = 1, limit = 10, status?: string) => {
+    let url = `/admin/admin-cases?employeeId=${employeeId}&page=${page}&limit=${limit}`;
 
-  create: (data: any) =>
-    http("/admin-cases", {
-      method: "POST",
-      body: JSON.stringify(data),
+    if (status) {
+      url += `&status=${status}`;
+    }
+
+    return http(url);
+  },
+
+  approve: (id: string) =>
+    http(`/admin/admin-cases/${id}/approve`, {
+      method: "PATCH",
     }),
 
-  apply: (id: string) =>
-    http(`/admin-cases/${id}/apply`, {
+  reject: (id: string, reason: string) =>
+    http(`/admin/admin-cases/${id}/reject`, {
       method: "PATCH",
+      body: JSON.stringify({ reason }),
     }),
 
   cancel: (id: string, reason: string) =>
-    http(`/admin-cases/${id}/cancel`, {
+    http(`/admin/admin-cases/${id}/cancel`, {
       method: "PATCH",
       body: JSON.stringify({ reason }),
+    }),
+
+  create: (data: any) =>
+    http(`/admin/admin-cases`, {
+      method: "POST",
+      body: JSON.stringify(data),
     }),
 };

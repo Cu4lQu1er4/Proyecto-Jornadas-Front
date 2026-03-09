@@ -1,5 +1,6 @@
 'use client';
 
+import { http } from "@/lib/http";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -24,14 +25,8 @@ export default function PeriodFilter({
   useEffect(() => {
     async function loadPeriods() {
       try {
-        const res = await fetch(
-          "http://localhost:3001/api/work/my-periods",
-          { credentials: "include" }
-        );
-
-        if (!res.ok) throw new Error();
-
-        const data = await res.json();
+        const data = await http<Period[]>("/work/my-periods");
+        console.log("PERIODS:", data);
         setPeriods(data ?? []);
 
         if (data?.length > 0) {
@@ -87,9 +82,13 @@ export default function PeriodFilter({
           "
         >
           {periods.map((period) => {
-            const label = `${period.year} - ${period.month} (${
-              period.half === 1 ? "1ra quincena" : "2da quincena"
-            })`;
+            const start = new Date(period.startDate);
+            const half = start.getDate() <= 15 ? "1ra quincena" : "2da quincena";
+
+            const label = `${start.toLocaleDateString("es-CO", {
+              year: "numeric",
+              month: "long",
+            })} (${half})`;
 
             return (
               <option key={period.id} value={period.id}>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { http } from "@/lib/http";
 
@@ -10,17 +11,47 @@ type Props = {
 };
 
 export default function ChangePasswordModal({
-  open, onClose
+  open,
+  onClose,
 }: Props) {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   if (!open) return null;
 
+  function validatePassword(password: string) {
+    if (password.length < 6) {
+      return "Debe tener al menos 6 caracteres";
+    }
+    return null;
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (loading) return;
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast.error("Completa todos los campos");
+      return;
+    }
+
+    if (newPassword === currentPassword) {
+      toast.error("La nueva contraseña no puede ser igual a la actual");
+      return;
+    }
+
+    const validationError = validatePassword(newPassword);
+    if (validationError) {
+      toast.error(validationError);
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast.error("Las contraseñas no coinciden");
+      return;
+    }
 
     setLoading(true);
 
@@ -33,7 +64,11 @@ export default function ChangePasswordModal({
         }),
       });
 
-      toast.success("Contraseña actualizada");
+      toast.success("Contraseña actualizada correctamente");
+
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
       onClose();
     } catch (error: any) {
       toast.error(error?.message || "Error al cambiar la contraseña");
@@ -43,51 +78,117 @@ export default function ChangePasswordModal({
   }
 
   return (
-    <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-      <form
-        onSubmit={handleSubmit}
-        className="
-          bg-white rounded-2xl border border-border p-6 w-full max-w-md
-          flex flex-col gap-4"
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+        onClick={onClose}
       >
-        <h2 className="text-lg font-semibold">
-          Cambiar contraseña
-        </h2>
+        <motion.div
+          initial={{ scale: 0.95, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.95, opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          onClick={(e) => e.stopPropagation()}
+          className="
+            bg-white w-full max-w-md
+            rounded-2xl border border-border
+            p-6 flex flex-col gap-6
+            max-h-[90vh] overflow-y-auto
+          "
+        >
+          <header>
+            <h2 className="text-lg font-semibold text-text">
+              Cambiar contraseña
+            </h2>
+            <p className="text-sm text-text-muted">
+              Usa una contraseña segura y diferente a la anterior
+            </p>
+          </header>
 
-        <input
-          type="password"
-          placeholder="Contraseña actual"
-          value={currentPassword}
-          onChange={(e) => setCurrentPassword(e.target.value)}
-          className="h-10 px-3 rounded-xl border border-border"
-        />
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
 
-        <input
-          type="password"
-          placeholder="Nueva contraseña"
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
-          className="h-10 px-3 rounded-xl border border-border"
-        />
+            <PasswordInput
+              placeholder="Contraseña actual"
+              value={currentPassword}
+              onChange={setCurrentPassword}
+            />
 
-        <div className="flex justify-end gap-3 mt-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 rounded-xl border border-border"
-          >
-            Cancelar
-          </button>
+            <PasswordInput
+              placeholder="Nueva contraseña"
+              value={newPassword}
+              onChange={setNewPassword}
+            />
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="px-4 py-2 rounded-xl bg-primary text-white"
-          >
-            {loading ? "Guardando..." : "Guardar"}
-          </button>
-        </div>
-      </form>
-    </div>
-  )
+            <PasswordInput
+              placeholder="Confirmar nueva contraseña"
+              value={confirmPassword}
+              onChange={setConfirmPassword}
+            />
+
+            <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-2">
+
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                type="button"
+                onClick={onClose}
+                className="
+                  h-10 px-4 rounded-xl
+                  bg-surface border border-border
+                  text-text text-sm font-medium
+                  hover:bg-danger-soft hover:text-danger
+                  transition
+                "
+              >
+                Cancelar
+              </motion.button>
+
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                type="submit"
+                disabled={loading}
+                className="
+                  h-10 px-4 rounded-xl
+                  bg-primary text-white text-sm font-medium
+                  transition hover:opacity-90
+                  disabled:opacity-60
+                "
+              >
+                {loading ? "Guardando..." : "Guardar contraseña"}
+              </motion.button>
+
+            </div>
+
+          </form>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
+function PasswordInput({
+  placeholder,
+  value,
+  onChange,
+}: {
+  placeholder: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <input
+      type="password"
+      placeholder={placeholder}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="
+        h-11 px-4 rounded-xl
+        border border-border
+        bg-background text-sm text-text
+        focus:outline-none focus:ring-2 focus:ring-primary
+      "
+    />
+  );
 }

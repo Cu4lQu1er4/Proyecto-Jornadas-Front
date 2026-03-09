@@ -1,5 +1,6 @@
 'use client';
 
+import { http } from "@/lib/http";
 import { useEffect, useState } from "react";
 
 type Period = {
@@ -7,6 +8,9 @@ type Period = {
   startDate: string;
   endDate: string;
   closedAt: string | null;
+  totalWorked: number;
+  totalExpected: number;
+  totalDelta: number;
 };
 
 export default function EmployeePeriods({
@@ -17,69 +21,115 @@ export default function EmployeePeriods({
   onSelectPeriod: (periodId: string) => void;
 }) {
   const [periods, setPeriods] = useState<Period[]>([]);
-  const [selected, setSelected] = useState<string>("");
+  const [selected, setSelected] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
-      const res = await fetch(
-        'http://localhost:3001/api/work/periods',
-        { credentials: 'include' }
-      );
+      try {
+        const data = await http(
+          `/work/admin/employees/${employeeId}/periods`
+        );
 
-      if (!res.ok) return;
-
-      const data = await res.json();
-      setPeriods(data.items ?? data);
+        setPeriods(data ?? []);
+      } catch (error) {
+        console.error("Error loading periods:", error);
+        setPeriods([]);
+      }
     }
-
     load();
-  }, []);
+  }, [employeeId]);
 
-  useEffect(() => {
-    if (!selected) return;
-    onSelectPeriod(selected);
-  }, [selected]);
+  function handleSelect(id: string) {
+    setSelected(id);
+    onSelectPeriod(id);
+  }
+
+  if (periods.length === 0) {
+    return (
+      <p className="text-sm text-text-muted">
+        Este empleado no tiene periodos registrados
+      </p>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4">
+      {periods.map((p) => {
+        const isClosed = !!p.closedAt;
+        const delta = p.totalDelta;
+        const isIrregular = isClosed && delta !== 0;
 
-      <div className="flex flex-col gap-1">
-        <h2 className="text-lg font-semibold">
-          Resumen por período
-        </h2>
-        <p className="text-sm text-text-muted">
-          Selecciona un período para ver su detalle
-        </p>
-      </div>
+        const deltaLabel =
+          delta > 0
+            ? `+${delta} min`
+            : delta < 0
+            ? `${delta} min`
+            : "0 min";
 
-      <select
-        value={selected}
-        onChange={(e) => setSelected(e.target.value)}
-        className="
-          w-full h-11 rounded-xl border border-border
-          px-4 text-sm
-          outline-none
-          focus:ring-2 focus:ring-primary/30
-          bg-background
-        "
-      >
-        <option value="">
-          Selecciona un período
-        </option>
+        const deltaStyle =
+          delta < 0
+            ? "bg-danger-soft text-danger"
+            : delta > 0
+            ? "bg-warning-soft text-warning"
+            : "bg-success-soft text-success";
 
-        {periods.map((p) => {
-          const isClosed = !!p.closedAt;
+        return (
+          <button
+            key={p.id}
+            onClick={() => handleSelect(p.id)}
+            className={`
+              w-full text-left border border-border rounded-2xl p-4 transition
+              ${selected === p.id ? "bg-primary-soft" : "bg-white"}
+            `}
+          >
+            <div className="flex items-center justify-between gap-6 flex-wrap">
+              <div className="flex flex-col gap-2">
+                <span className="text-sm font-medium text-text">
+                  {new Date(p.startDate).toLocaleDateString()} -{" "}
+                  {new Date(p.endDate).toLocaleDateString()}
+                </span>
 
-          return (
-            <option key={p.id} value={p.id}>
-              {new Date(p.startDate).toLocaleDateString()} —{" "}
-              {new Date(p.endDate).toLocaleDateString()}
-              {isClosed ? " (Cerrado)" : ""}
-            </option>
-          );
-        })}
-      </select>
+                <div className="flex flex-wrap items-center gap-3 text-sm text-text-muted">
+                  {isClosed ? (
+                    <span>Periodo cerrado</span>
+                  ) : (
+                    <span>Periodo en curso</span>
+                  )}
 
+                  {isClosed && (
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm font-medium ${
+                        isIrregular
+                          ? "bg-danger-soft text-danger"
+                          : "bg-success-soft text-success"
+                      }`}
+                    >
+                      {isIrregular ? "Irregular" : "Correcto"}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {isClosed && (
+                <span
+                  className={`px-3 py-1 rounded-full text-sm font-medium ${deltaStyle}`}
+                >
+                  {deltaLabel}
+                </span>
+              )}
+
+              {!isClosed && (
+                <span
+                  className="
+                    px-3 py-1 rounded-full text-sm font-medium bg-success-soft text-success"
+                >
+                  Abierto
+                </span>
+              )}
+            </div>
+          </button>
+        );
+      })}
     </div>
   );
 }

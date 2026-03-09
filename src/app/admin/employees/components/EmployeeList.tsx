@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import CreateEmployeeModal from "./CreateEmployeeModal";
 
 type Employee = {
@@ -32,77 +33,116 @@ export default function EmployeeList({ employees }: { employees: Employee[] }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <button
-        onClick={() => setOpen(true)}
-        className="h-10 px-4 rounded-xl bg-primary text-white text-sm"
-      >
-        Nuevo empleado
-      </button>
 
-      {/* Header */}
-      <div className="flex items-center justify-between gap-4">
-        <h1 className="text-lg font-semibold text-text">
-          Empleados
-        </h1>
+      {/* HEADER */}
+      <div className="
+        flex flex-col gap-4
+        sm:flex-row sm:items-center sm:justify-between
+      ">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-sm text-text-muted">
+            Empleados
+          </h2>
+          <p className="text-sm text-text-muted">
+            Total: {employees.length} · Mostrando: {filtered.length}
+          </p>
+        </div>
 
-        <input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Buscar empleado..."
-          className="h-10 w-64 rounded-xl border border-border bg-background px-4 text-sm text-text outline-none"
-        />
+        <div className="
+          flex flex-col gap-3
+          sm:flex-row sm:items-center
+          w-full sm:w-auto
+        ">
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Buscar empleado..."
+            className="
+              h-11 w-full sm:w-64
+              rounded-xl border border-border
+              bg-background px-4
+              text-sm text-text
+              transition
+              focus:outline-none
+              focus:ring-2 focus:ring-primary
+            "
+          />
+
+          <motion.button
+            whileTap={{ scale: 0.97 }}
+            whileHover={{ scale: 1.03 }}
+            onClick={() => setOpen(true)}
+            className="
+              h-11 px-4
+              rounded-xl bg-primary text-white
+              text-sm font-medium
+              transition hover:opacity-90
+            "
+          >
+            Nuevo empleado
+          </motion.button>
+        </div>
       </div>
 
-      {/* List */}
+      {/* LIST */}
       <div className="bg-white border border-border rounded-2xl overflow-hidden">
 
         {filtered.map((e) => {
           const fullName = `${e.firstName ?? ""} ${e.lastName ?? ""}`.trim();
 
           return (
-            <button
+            <motion.button
               key={e.id}
+              whileTap={{ scale: 0.99 }}
               onClick={() => router.push(`/admin/employees/${e.id}`)}
-              className="w-full text-left px-6 py-4 border-b border-border last:border-b-0 transition hover:bg-surface"
+              className="
+                w-full text-left
+                px-4 sm:px-6 py-4
+                border-b border-border last:border-b-0
+                transition hover:bg-surface
+              "
             >
-              <div className="flex items-center justify-between">
-
-                <div className="flex flex-col gap-1">
-
-                  {/* Nombre */}
+              <div className="
+                flex flex-col gap-3
+                sm:flex-row sm:items-center sm:justify-between
+              ">
+                <div className="flex flex-col gap-2">
                   <p className="text-sm font-medium text-text">
                     {fullName || e.document}
                   </p>
 
-                  {/* Subinfo */}
-                  <div className="flex items-center gap-3 text-sm text-text-muted">
-
+                  <div className="
+                    flex flex-wrap items-center
+                    gap-2 sm:gap-3
+                    text-xs sm:text-sm text-text-muted
+                  ">
                     <span>{e.document}</span>
-
+                    <span className="hidden sm:inline">•</span>
                     <span>
                       {e.role === "ADMIN" ? "Administrador" : "Empleado"}
                     </span>
 
                     <span
-                      className={`px-2 py-0.5 rounded-full text-xs font-medium
-                        ${e.active
+                      className={`px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${
+                        e.active
                           ? "bg-success-soft text-success"
                           : "bg-danger-soft text-danger"
-                        }
-                      `}
+                      }`}
                     >
                       {e.active ? "Activo" : "Inactivo"}
                     </span>
-
                   </div>
                 </div>
 
-                <span className="text-sm text-text-muted">
+                <span className="
+                  text-xs sm:text-sm
+                  text-text-muted
+                  self-start sm:self-auto
+                ">
                   Ver →
                 </span>
-
               </div>
-            </button>
+            </motion.button>
           );
         })}
 
@@ -112,14 +152,14 @@ export default function EmployeeList({ employees }: { employees: Employee[] }) {
           </div>
         )}
 
-        {open && (
-          <CreateEmployeeModal
-            onClose={() => setOpen(false)}
-            onCreated={() => window.location.reload()}
-          />
-        )}
-
       </div>
+
+      {open && (
+        <CreateEmployeeModal
+          onClose={() => setOpen(false)}
+          onCreated={() => window.location.reload()}
+        />
+      )}
     </div>
   );
 }

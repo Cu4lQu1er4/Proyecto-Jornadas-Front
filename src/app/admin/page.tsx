@@ -1,86 +1,97 @@
-import { cookies } from "next/headers";
+"use client";
+
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { Card } from "@/components/Card";
 
-async function getData() {
-  const cookieStore = cookies();
-  const token = (await cookieStore).get("access_token");
+export default function AdminDashboard() {
+  const [data, setData] = useState({
+    totalEmployees: 0,
+    openPeriods: 0,
+    openWorkdays: 0,
+  });
 
-  if (!token) return null;
+  const [loading, setLoading] = useState(true);
 
-  const headers = {
-    Cookie: `access_token=${token.value}`,
-  };
+  useEffect(() => {
+    async function load() {
+      try {
+        const [employeesRes, periodsRes, liveRes] = await Promise.all([
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/work/admin/employees`, {
+            credentials: "include",
+          }),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/work/periods`, {
+            credentials: "include",
+          }),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/work/admin/live-workdays`, {
+            credentials: "include",
+          }),
+        ]);
 
-  const [employeesRes, periodsRes] = await Promise.all([
-    fetch("http://localhost:3001/api/work/admin/employees", {
-      headers,
-      cache: "no-store",
-    }),
-    fetch("http://localhost:3001/api/work/periods", {
-      headers,
-      cache: "no-store",
-    }),
-  ]);
+        const employees = employeesRes.ok ? await employeesRes.json() : [];
+        const periodsData = periodsRes.ok ? await periodsRes.json() : { items: [] };
+        const liveData = liveRes.ok ? await liveRes.json() : { count: 0 };
 
-  const employees = employeesRes.ok ? await employeesRes.json() : [];
-  const periodsData = periodsRes.ok ? await periodsRes.json() : { data: [] };
+        setData({
+          totalEmployees: employees.length,
+          openPeriods:
+            periodsData.items?.filter((p: any) => !p.closedAt).length ?? 0,
+          openWorkdays: liveData.count ?? 0,
+        });
 
-  const openPeriods =
-    periodsData.data?.filter((p: any) => !p.closedAt) ?? [];
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
 
-  return {
-    totalEmployees: employees.length,
-    openPeriods: openPeriods.length,
-  };
-}
-
-export default async function AdminDashboard() {
-  const data = await getData();
+    load();
+  }, []);
 
   return (
-    <main className="min-h-screen bg-surface p-6 rounded-2xl border border-border">
-      <div className="max-w-7xl mx-auto flex flex-col gap-6">
+    <main className="min-h-[100dvh] bg-surface px-4 sm:px-6 py-8">
+      <div className="max-w-7xl mx-auto flex flex-col gap-8">
 
-        {/* Header */}
-        <header className="flex flex-col gap-1">
-          <h1 className="text-lg font-semibold text-text">
+        <motion.header
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="space-y-2"
+        >
+          <h1 className="text-2xl font-semibold text-text tracking-tight">
             Panel de administración
           </h1>
           <p className="text-sm text-text-muted">
             Resumen general del sistema
           </p>
-        </header>
+        </motion.header>
 
-        {/* Grid */}
-        <section
+        <motion.section
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.1, duration: 0.3 }}
           className="
             grid
             grid-cols-1
             sm:grid-cols-2
-            lg:grid-cols-4
+            lg:grid-cols-3
             gap-6
           "
         >
           <Card
-            title="Usuarios activos"
-            value={data?.totalEmployees ?? 0}
+            title="Jornadas abiertas"
+            value={loading ? "..." : data.openWorkdays}
           />
-
           <Card
             title="Períodos abiertos"
-            value={data?.openPeriods ?? 0}
+            value={loading ? "..." : data.openPeriods}
           />
-
           <Card
-            title="Estadísticas"
-            span="wide"
+            title="Usuarios activos"
+            value={loading ? "..." : data.totalEmployees}
           />
-
-          <Card
-            title="Actividad reciente"
-            height="tall"
-          />
-        </section>
+        </motion.section>
 
       </div>
     </main>

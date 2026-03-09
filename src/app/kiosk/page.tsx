@@ -1,7 +1,10 @@
 'use client';
 
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { toast } from "sonner";
+import { queuePunch, syncQueue, syncEmployees } from "@/lib/kioskQueue";
+import { http } from "@/lib/http";
 
 type WorkdayStatus = {
   hasOpenWorkday: boolean;
@@ -14,27 +17,50 @@ type Employee = {
 
 export default function KioskPage() {
   const [document, setDocument] = useState("");
-  const [password, setPassword] = useState("");
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [status, setStatus] = useState<WorkdayStatus | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [now, setNow] = useState(new Date());
   const [pin, setPin] = useState("");
+  const [kioskToken, setKioskToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    const saved = sessionStorage.getItem("kioskToken");
+    if (saved) setKioskToken(saved);
+  }, []);
+
+  useEffect(() => {
+    syncEmployees();
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setNow(new Date());
     }, 1000);
-
-    return () => clearInterval(interval)
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
-    if (employee) {
-      fetchStatus();
-    }
+    if (employee) fetchStatus();
   }, [employee]);
+
+  useEffect(() => {
+
+    const handleOnline = () => {
+      syncQueue();
+    };
+
+    window.addEventListener("online", handleOnline);
+
+    syncQueue();
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+    };
+
+  }, []);
+
 
   async function handleKioskLogin(pinValue: string) {
     if (!document) {
@@ -47,27 +73,59 @@ export default function KioskPage() {
       setLoading(true);
       setError(null);
 
-      const res = await fetch(
-        'http://localhost:3001/api/auth/kiosk-login',
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({
-            document,
-            pin: pinValue,
-          }),
-        }
+      const res = await http("/kiosk/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ document, pin: pinValue }),
+      });
+
+      if (!res.ok) throw new Error();
+
+      const data = await res.json();
+
+      sessionStorage.setItem("kioskToken", data.kioskToken);
+      setKioskToken(data.kioskToken);
+
+      localStorage.setItem(
+        "kioskEmployee",
+        JSON.stringify({
+          document,
+          employeeId: data.employee.id,
+        })
       );
 
-      if (!res.ok) {
-        throw new Error("PIN incorrecto");
+      setEmployee({ document });
+      setStatus({
+        hasOpenWorkday: false,
+        startTime: null,
+      });
+      setPin("");
+    } catch (err) {
+      if (!navigator.onLine) {
+        const cached = localStorage.getItem("kioskEmployee");
+
+        if (cached) {
+          const employee = JSON.parse(cached);
+
+          if (employee.document === document) {
+            setEmployee({ document: employee.document });
+
+            setStatus({
+              hasOpenWorkday: false,
+              startTime: null
+            });
+
+            toast.warning("Modo offline");
+            setPin("");
+            return;
+          }
+        }
+
+        toast.error("Sin conexion y empleado no reconocido");
+        setPin("");
+        return;
       }
 
-      setEmployee({ document });
-      await fetchStatus();
-      setPin("");
-    } catch {
       toast.error("PIN incorrecto");
       setPin("");
     } finally {
@@ -76,81 +134,103 @@ export default function KioskPage() {
   }
 
   async function fetchStatus() {
-    const res = await fetch(
-      'http://localhost:3001/api/kiosk/status',
-      {
-        credentials: 'include',
+    if (!kioskToken) return;
+
+    try {
+      const res = await http("/kiosk/status", {
         headers: {
-          'X-Client': 'kiosk',
+          Authorization: `Bearer ${kioskToken}`,
         },
+      });
+
+      if (res.status === 401) {
+        handleLogout();
+        return;
       }
-    );
 
-    if (!res.ok) throw new Error('STATUS_FAILED');
+      if (!res.ok) throw new Error();
 
-    const data = await res.json();
-    setStatus(data);
+      const data = await res.json();
+      setStatus(data);
+    } catch {
+      console.log("Offline - no se pudo obtener el estado");
+
+      setStatus({
+        hasOpenWorkday: false,
+        startTime: null
+      });
+    }
   }
 
   async function handleMainAction() {
     if (!status || loading) return;
 
-    const wasOpen = status.hasOpenWorkday;
+    const url = status.hasOpenWorkday
+      ? "http://localhost:3001/api/kiosk/end"
+      : "http://localhost:3001/api/kiosk/start";
 
-    setLoading(true);
-    setError(null);
-
-    const url = wasOpen
-      ? 'http://localhost:3001/api/work/end'
-      : 'http://localhost:3001/api/work/start';
+    const body = JSON.stringify({
+      timestamp: new Date().toISOString(),
+    });
 
     try {
+      setLoading(true);
+
       const res = await fetch(url, {
         method: "POST",
-        credentials: "include",
         headers: {
-          "X-Client": "kiosk",
+          ...(kioskToken && {Authorization: `Bearer ${kioskToken}` }),
+          "Content-Type": "application/json",
         },
+        body,
       });
 
-      if (res.status === 409) {
-        const data = await res.json();
-
-        if (data?.message?.include("cerrada")) {
-          setError("La quincena esta cerrada. Contacte al administrador");
-          return;
-        }
-
-        await fetchStatus();
-        
-        if (wasOpen) {
-          handleLogout();
-        }
-      }
-
-      if (!res.ok) {
-        throw new Error("ACTION_FAILED");
-      }
+      if (!res.ok) throw new Error();
 
       await fetchStatus();
-
     } catch {
-      setError("No se pudo procesar la accion");
+      const cached = localStorage.getItem("kioskEmployee");
+      const employee = cached ? JSON.parse(cached) : null;
+
+      if (!employee) {
+        toast.error("Empleado no disponible offline");
+        return;
+      }
+
+      await queuePunch({
+        url: "http://localhost:3001/api/kiosk/punch",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          employeeId: employee.employeeId,
+          type: status.hasOpenWorkday ? "end" : "start",
+          timestamp: new Date().toISOString(),
+        }),
+      });
+
+      setStatus((prev) => {
+        if (!prev) return prev;
+
+        return {
+          ...prev,
+          hasOpenWorkday: !prev.hasOpenWorkday,
+        };
+      });
+
+      toast.warning("Sin internet. Registro guardado");
     } finally {
       setLoading(false);
     }
   }
 
   function handleLogout() {
-    fetch('http://localhost:3001/api/auth/logout', {
-      method: 'POST',
-      credentials: 'include',
-    }).finally(() => {
-      setEmployee(null);
-      setStatus(null);
-      setDocument('');
-      setPassword('');
-    });
+    sessionStorage.removeItem("kioskToken");
+    setKioskToken(null);
+    setEmployee(null);
+    setStatus(null);
+    setDocument("");
+    setPin("");
   }
 
   function formatTime(date: Date) {
@@ -163,23 +243,24 @@ export default function KioskPage() {
 
   function handlePinInput(value: string) {
     if (pin.length >= 4) return;
-
     const newPin = pin + value;
     setPin(newPin);
-
-    if (newPin.length === 4) {
-      handleKioskLogin(newPin);
-    }
+    if (newPin.length === 4) handleKioskLogin(newPin);
   }
 
   function clearPin() {
     setPin("");
   }
 
+
   if (!employee) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-background">
-        <div className="w-full max-w-md bg-white border border-border rounded-3xl p-8 flex flex-col gap-8">
+      <main className="min-h-screen flex items-center justify-center bg-background p-4">
+        <motion.div
+          initial={{ scale: 0.95, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="w-full max-w-md bg-white border border-border rounded-3xl p-8 flex flex-col gap-8 shadow-xl"
+        >
           <header className="text-center flex flex-col gap-2">
             <h1 className="text-xl font-semibold text-text">
               Registro de jornada
@@ -193,7 +274,7 @@ export default function KioskPage() {
             placeholder="Documento"
             value={document}
             onChange={(e) => setDocument(e.target.value)}
-            className="h-12 px-4 rounded-2xl border border.border bg-surface text-text text-base text-center"
+            className="h-14 px-4 rounded-2xl border border-border bg-surface text-text text-lg text-center"
           />
 
           <div className="flex justify-center gap-4">
@@ -202,37 +283,39 @@ export default function KioskPage() {
                 key={i}
                 className="w-6 h-6 rounded-full border-2 border-primary flex items-center justify-center"
               >
-                {pin[i] ? (
+                {pin[i] && (
                   <div className="w-3 h-3 rounded-full bg-primary" />
-                ) : null}
-              </div>  
+                )}
+              </div>
             ))}
           </div>
 
-          <div className="grid grid-cols-3 gap-4 mt-4">
+          <div className="grid grid-cols-3 gap-4">
             {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
-              <button
+              <motion.button
+                whileTap={{ scale: 0.92 }}
                 key={n}
                 onClick={() => handlePinInput(String(n))}
-                className="h-16 rounded-2xl bg-gray-100 text-sl font-semibold hover:bg-gray-200"
+                className="h-20 rounded-2xl bg-gray-100 text-2xl font-semibold hover:bg-gray-200"
               >
                 {n}
-              </button>
+              </motion.button>
             ))}
 
             <button
               onClick={clearPin}
-              className="h-16 rounded-2xl bg-danger-soft text-danger font-semibold"
+              className="h-20 rounded-2xl bg-danger-soft text-danger font-semibold"
             >
               Borrar
             </button>
 
-            <button
+            <motion.button
+              whileTap={{ scale: 0.92 }}
               onClick={() => handlePinInput("0")}
-              className="h-16 rounded-2xl bg-gray-100 text-xl font-semibold hover:bg-gray-200"
+              className="h-20 rounded-2xl bg-gray-100 text-2xl font-semibold hover:bg-gray-200"
             >
               0
-            </button>
+            </motion.button>
 
             <div />
           </div>
@@ -242,7 +325,7 @@ export default function KioskPage() {
               {error}
             </p>
           )}
-        </div>
+        </motion.div>
       </main>
     );
   }
@@ -250,52 +333,35 @@ export default function KioskPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-surface px-4">
-      <div className="w-full max-w-md bg-white rounded-3xl shadow-xl flex flex-col gap-8 text-center p-10">
-
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="w-full max-w-md bg-white rounded-3xl shadow-xl flex flex-col gap-8 text-center p-10"
+      >
         <div className="flex flex-col gap-2">
           <h1 className="text-2xl font-semibold">
             Registro de jornada
           </h1>
 
-          <span className="text-4xl font-bold tracking-wider text-primary">
+          <span className="text-5xl font-bold tracking-wider text-primary">
             {formatTime(now)}
           </span>
         </div>
 
-        <div className="flex flex-col gap-2">
-          <p className="text-text-muted">
-            Documento <b>{employee.document}</b>
-          </p>
-
-          {status && (
-            <span
-              className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium
-                ${
-                  status.hasOpenWorkday
-                    ? "bg-warning-soft text-warning"
-                    : "bg-success-soft text-success"
-                }
-              `}
-            >
-              <span className={`w-2 h-2 rounded-full ${
-                status.hasOpenWorkday ? "bg-warning" : "bg-success"
-              }`} />
-              {status.hasOpenWorkday
-                ? "Jornada en curso"
-                : "Sin jornada activa"}
-            </span>
-          )}
-        </div>
+        <p className="text-text-muted">
+          Documento <b>{employee.document}</b>
+        </p>
 
         {status && (
-          <button
+          <motion.button
+            whileTap={{ scale: 0.97 }}
             onClick={handleMainAction}
             disabled={loading}
-            className={`w-full rounded-2xl py-6 text-xl font-semibold text-white transition
+            className={`w-full rounded-2xl py-8 text-2xl font-semibold text-white transition
               ${
                 status.hasOpenWorkday
-                  ? "bg-danger hover:opacity-90"
-                  : "bg-success hover:opacity-90"
+                  ? "bg-danger"
+                  : "bg-success"
               }
               disabled:opacity-60
             `}
@@ -305,13 +371,12 @@ export default function KioskPage() {
               : status.hasOpenWorkday
                 ? "Cerrar jornada"
                 : "Iniciar jornada"}
-          </button>
+          </motion.button>
         )}
 
         <button
           onClick={handleLogout}
-          className="w-full rounded-2xl py-4 text-sm font-medium
-            bg-gray-100 hover:bg-gray-200 transition"
+          className="w-full rounded-2xl py-4 text-sm font-medium bg-gray-100 hover:bg-gray-200"
         >
           Cerrar sesión
         </button>
@@ -321,7 +386,7 @@ export default function KioskPage() {
             {error}
           </p>
         )}
-      </div>
+      </motion.div>
     </div>
   );
 }

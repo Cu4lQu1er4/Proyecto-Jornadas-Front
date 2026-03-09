@@ -27,52 +27,54 @@ export default function PeriodsTable({
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-border overflow-hidden">
-      {periods.map(p => {
-        const status =
-          p.isClosed
-            ? { label: 'Cerrado', className: 'bg-surface text-text-muted' }
-            : p.isOverdue
-            ? {
-                label: `Vencido (${p.daysOverdue}d)`,
-                className: 'bg-danger-soft text-danger',
-              }
-            : {
-                label: 'Abierto',
-                className: 'bg-success-soft text-success',
-              };
-
+    <div className="bg-white border border-border rounded-2xl overflow-hidden">
+      {periods.map((p) => {
+        const status = p.isClosed
+          ? {
+              label: "Cerrado",
+              className: "bg-primary-soft text-primary",
+            }
+          : p.isOverdue
+          ? {
+              label: `Vencido · ${p.daysOverdue} dias(s)`,
+              className: "bg-danger-soft text-danger",
+            }
+          : {
+              label: "Abierto",
+              className: "bg-success-soft text-success",
+            };
+        
         return (
           <div
             key={p.id}
-            className="px-5 py-4 flex flex-col gap-2 border-b border-border last:border-b-0"
+            className="flex flex-col gap-3 p-6 border border-border last:border-b-0"
           >
-            {/* Fila principal */}
-            <div className="flex items-center justify-between text-sm">
-              <div className="flex flex-col">
-                <span className="font-medium">
-                  {p.year} / {p.month + 1} ·{' '}
-                  {p.half === 1 ? '1ra' : '2da'} quincena
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-1">
+                <span className="text-sm font-medium text-text">
+                  {p.year} / {p.month} · {" "}
+                  {p.half === 1 ? "1ra" : "2da"} quincena
                 </span>
-                <span className="text-xs text-text-muted">
-                  {new Date(p.startDate).toLocaleDateString()} –{' '}
+
+                <span className="text-sm text-text-muted">
+                  {new Date(p.startDate).toLocaleDateString()} -{""}
                   {new Date(p.endDate).toLocaleDateString()}
                 </span>
               </div>
 
               <div className="flex items-center gap-3">
-                {/* Estado */}
                 <span
-                  className={`px-3 py-1 rounded-full text-xs font-medium ${status.className}`}
+                  className={`px-3 py-1 rounded-full text-sm font-medium ${status.className}`}
                 >
                   {status.label}
                 </span>
 
-                {/* Acción */}
                 {!p.isClosed && (
                   <button
                     onClick={() => onClose(p.id)}
-                    className="text-primary text-xs hover:underline"
+                    className="
+                      h-9 px-4 rounded-xl bg-danger text-white text-sm font-medium
+                      transition hover:opacity-90"
                   >
                     Cerrar
                   </button>
@@ -80,13 +82,12 @@ export default function PeriodsTable({
               </div>
             </div>
 
-            {/* Info extra solo si aplica */}
             {!p.isClosed && p.isOverdue && (
-              <div className="text-xs text-warning">
-                ⚠️ Este periodo debía cerrarse hace {p.daysOverdue} días
+              <div className="text-sm bg-warning-soft text-warning rounded-xl px-4 py-2">
+                Este periodo debia cerrarse hace {p.daysOverdue} dia(s).
               </div>
             )}
-          </div>
+          </div>  
         );
       })}
     </div>

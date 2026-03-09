@@ -1,5 +1,6 @@
 'use client';
 
+import { http } from "@/lib/http";
 import { useEffect, useState } from "react";
 
 type HistorySummary = {
@@ -42,17 +43,15 @@ export default function HistoryList({ period, onTotalMinutes }: Props) {
       setError(null);
 
       try {
-        const res = await fetch(
-          `http://localhost:3001/api/work/history?from=${encodeURIComponent(
-            period.startDate
-          )}&to=${encodeURIComponent(period.endDate)}`,
-          { credentials: "include" }
+        const data = await http<{
+          entries: HistoryEntry[];
+          summary: HistorySummary;
+        }>(
+          `/work/history?from=${encodeURIComponent(
+            period?.startDate
+          )}&to=${encodeURIComponent(period.endDate)}`
         );
-
-        if (!res.ok) throw new Error();
-
-        const data = await res.json();
-
+        
         setItems(data.entries ?? []);
         setSummary(data.summary ?? null);
 

@@ -3,22 +3,24 @@ export default function StatusBadge({
 }: {
   status: Status;
 }) {
-  const map: Record<Status, string> = {
+  const styleMap: Record<Status, string> = {
     NORMAL: "bg-success-soft text-success",
-    JUSTIFIED: "bg-primary-soft text-primary",
+    JUSTIFIED: "bg-success-soft text-success",
     PARTIALLY_UNJUSTIFIED: "bg-warning-soft text-warning",
     UNJUSTIFIED_ABSENCE: "bg-danger-soft text-danger",
-    INCAPACITY: "bg-surface text-text-muted",
+    INCAPACITY: "bg-primary-soft text-primary",
     CONFLICT: "bg-danger-soft text-danger font-semibold",
+    NON_OPERATIONAL_DAY: "bg-surface text-text-muted",
   };
 
   const labelMap: Record<Status, string> = {
-    NORMAL: "Normal",
+    NORMAL: "Correcto",
     JUSTIFIED: "Justificado",
-    PARTIALLY_UNJUSTIFIED: "Parcial",
-    UNJUSTIFIED_ABSENCE: "Inasistencia",
+    PARTIALLY_UNJUSTIFIED: "Parcialmente injustificado",
+    UNJUSTIFIED_ABSENCE: "Inasistencia injustificada",
     INCAPACITY: "Incapacidad",
     CONFLICT: "Conflicto",
+    NON_OPERATIONAL_DAY: "No operativo"
   };
 
   return (
@@ -27,7 +29,7 @@ export default function StatusBadge({
         px-2.5 py-1
         rounded-full
         text-xs font-medium
-        ${map[status] ?? "bg-surface text-text-muted"}
+        ${styleMap[status] ?? "bg-surface text-text-muted"}
       `}
     >
       {labelMap[status] ?? status}

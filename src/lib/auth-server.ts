@@ -4,8 +4,6 @@ export async function getServerUser() {
   const cookieStore = cookies();
   const accessToken = (await cookieStore).get("access_token");
 
-  console.log("SERVER TOKEN:", accessToken);
-
   if (!accessToken) return null;
 
   try {

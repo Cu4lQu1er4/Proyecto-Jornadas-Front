@@ -64,7 +64,10 @@ export default function SchedulePage() {
           <motion.button
             whileTap={{ scale: 0.97 }}
             whileHover={{ scale: 1.03 }}
-            onClick={() => setOpen(true)}
+            onClick={() => {
+              setEditing(null);
+              setOpen(true);
+            }}
             className="
               h-10 px-4 rounded-xl
               bg-primary text-white text-sm font-medium
@@ -133,7 +136,10 @@ export default function SchedulePage() {
 
                   <div className="flex gap-2 pt-2">
                     <button
-                      onClick={() => setEditing(t)}
+                      onClick={() => {
+                        setEditing(t);
+                        setOpen(true);
+                      }}
                       className="
                         text-xs px-3 py-1 border border-border rounded-lg hover:bg-surface"
                     >
@@ -158,7 +164,10 @@ export default function SchedulePage() {
         {open && (
           <CreateScheduleModal
             editing={editing}
-            onClose={() => setOpen(false)}
+            onClose={() => {
+              setOpen(false);
+              setEditing(null);
+            }}
             onCreated={load}
           />
         )}

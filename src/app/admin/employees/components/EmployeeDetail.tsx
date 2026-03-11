@@ -86,8 +86,13 @@ export default function EmployeeDetail({ employee }: { employee: Employee }) {
       toast.success("Horario asignado");
 
       setAssignOpen(false);
-    } catch {
-      toast.error("No se pudo asignar el horario");
+    } catch (err: any) {
+      console.error(err);
+
+      toast.error(
+        err?.message ||
+        "No se pudo asignar el horario"
+      );
     } finally {
       setAssignLoading(false);
     }

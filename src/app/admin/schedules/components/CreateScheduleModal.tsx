@@ -8,6 +8,7 @@ import { toast } from "sonner";
 type Props = {
   onClose: () => void;
   onCreated: () => void;
+  editing?: any;
 };
 
 const weekdays = [
@@ -23,9 +24,10 @@ const weekdays = [
 export default function CreateScheduleModal({
   onClose,
   onCreated,
+  editing,
 }: Props) {
-  const [name, setName] = useState("");
-  const [days, setDays] = useState<any[]>([]);
+  const [name, setName] = useState(editing?.name ?? "");
+  const [days, setDays] = useState<any[]>(editing?.days ?? []);
   const [loading, setLoading] = useState(false);
 
   function timeToMinutes(time: string) {
@@ -68,9 +70,18 @@ export default function CreateScheduleModal({
     setLoading(true);
 
     try {
-      await scheduleApi.create({ name, days });
+      if (editing) {
+        await scheduleApi.update(editing.id, {
+          name, days,
+        });
 
-      toast.success("Horario creado");
+        toast.success("Horario actualizado");
+      } else {
+        await scheduleApi.create({ name, days });
+
+        toast.success("Horario creado");
+      }
+
       onCreated();
       onClose();
     } catch {
@@ -100,14 +111,16 @@ export default function CreateScheduleModal({
             p-6 flex flex-col gap-6
           "
         >
+
           <h2 className="text-lg font-semibold">
-            Nuevo horario
+            {editing ? "Editar horario" : "Nuevo horario"}
           </h2>
 
           <form
             onSubmit={handleSubmit}
             className="flex flex-col gap-6"
           >
+
             <input
               placeholder="Nombre del horario"
               value={name}
@@ -121,21 +134,30 @@ export default function CreateScheduleModal({
             />
 
             <div className="flex flex-col gap-4">
+
               <p className="text-sm font-medium">
                 Días
               </p>
 
-              {weekdays.map((d) => (
-                <DayRow
-                  key={d.value}
-                  day={d}
-                  onChange={upsertDay}
-                  onRemove={removeDay}
-                />
-              ))}
+              {weekdays.map((d) => {
+
+                const existing = days.find((x) => x.weekday === d.value);
+
+                return (
+                  <DayRow
+                    key={d.value}
+                    day={d}
+                    existing={existing}
+                    onChange={upsertDay}
+                    onRemove={removeDay}
+                  />
+                );
+              })}
+
             </div>
 
             <div className="flex flex-col-reverse sm:flex-row justify-end gap-3">
+
               <motion.button
                 whileTap={{ scale: 0.97 }}
                 type="button"
@@ -155,22 +177,39 @@ export default function CreateScheduleModal({
                   disabled:opacity-50
                 "
               >
-                {loading ? "Creando..." : "Crear"}
+                {loading
+                  ? "Guardando..."
+                  : editing
+                  ? "Actualizar"
+                  : "Crear"}
               </motion.button>
+
             </div>
+
           </form>
+
         </motion.div>
       </motion.div>
     </AnimatePresence>
   );
 }
 
-function DayRow({ day, onChange, onRemove }: any) {
-  const [enabled, setEnabled] = useState(false);
-  const [start, setStart] = useState("07:00");
-  const [end, setEnd] = useState("17:00");
+function DayRow({ day, existing, onChange, onRemove }: any) {
+
+  const [enabled, setEnabled] = useState(!!existing);
+  const [start, setStart] = useState(
+    existing
+      ? `${String(Math.floor(existing.startMinute / 60)).padStart(2, "0")}:${String(existing.startMinute % 60).padStart(2, "0")}`
+      : "07:00"
+  );
+  const [end, setEnd] = useState(
+    existing
+      ? `${String(Math.floor(existing.endMinute / 60)).padStart(2, "0")}:${String(existing.endMinute % 60).padStart(2, "0")}`
+      : "17:00"
+  );
 
   function handleToggle() {
+
     const next = !enabled;
     setEnabled(next);
 
@@ -179,22 +218,27 @@ function DayRow({ day, onChange, onRemove }: any) {
     } else {
       onRemove(day.value);
     }
+
   }
 
   function handleTimeChange(
     type: "start" | "end",
     value: string
   ) {
+
     if (type === "start") setStart(value);
     if (type === "end") setEnd(value);
 
     if (enabled) {
+
       onChange(
         day.value,
         type === "start" ? value : start,
         type === "end" ? value : end
       );
+
     }
+
   }
 
   return (
@@ -206,7 +250,9 @@ function DayRow({ day, onChange, onRemove }: any) {
         sm:flex-row sm:items-center sm:justify-between
       "
     >
+
       <div className="flex items-center gap-3">
+
         <input
           type="checkbox"
           checked={enabled}
@@ -216,9 +262,11 @@ function DayRow({ day, onChange, onRemove }: any) {
         <span className="text-sm font-medium">
           {day.label}
         </span>
+
       </div>
 
       <div className="flex gap-3">
+
         <input
           type="time"
           value={start}
@@ -246,7 +294,9 @@ function DayRow({ day, onChange, onRemove }: any) {
             disabled:opacity-50
           "
         />
+
       </div>
+
     </motion.div>
   );
 }

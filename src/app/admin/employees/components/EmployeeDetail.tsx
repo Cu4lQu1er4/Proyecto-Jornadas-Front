@@ -11,6 +11,7 @@ import { employeeApi } from "@/lib/api/employee.api";
 import { userAdminApi } from "@/lib/api/user.api";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { scheduleApi } from "@/lib/api/schedule.api";
 
 type Employee = {
   id: string;
@@ -31,6 +32,9 @@ export default function EmployeeDetail({ employee }: { employee: Employee }) {
 
   const [selectedPeriod, setSelectedPeriod] = useState<string | null>(null);
   const [schedule, setSchedule] = useState<any>(null);
+  const [templates, setTemplates] = useState<any[]>([]);
+  const [assignOpen, setAssignOpen] = useState(false);
+  const [assignLoading, setAssignLoading] = useState(false);
   const [tempPassword, setTempPassword] = useState<string | null>(null);
   const [tempPin, setTempPin] = useState<string | null>(null);
   const [tab, setTab] = useState<TabType>("schedule");
@@ -67,6 +71,28 @@ export default function EmployeeDetail({ employee }: { employee: Employee }) {
     }
   }
 
+  async function handleAssign(templateId: string) {
+    try {
+      setAssignLoading(true);
+
+      await employeeScheduleApi.assign(
+        employee.id,
+        templateId
+      );
+
+      toast.success("Horario asignado");
+
+      const updated = await employeeScheduleApi.current(employee.id);
+      setSchedule(updated);
+
+      setAssignOpen(false);
+    } catch {
+      toast.error("No se pudo asignar el horario");
+    } finally {
+      setAssignLoading(false);
+    }
+  }
+
   useEffect(() => {
     async function loadSchedule() {
       try {
@@ -78,6 +104,19 @@ export default function EmployeeDetail({ employee }: { employee: Employee }) {
     }
     loadSchedule();
   }, [employee.id]);
+
+  useEffect(() => {
+    async function loadTemplates() {
+      try {
+        const data: any = await scheduleApi.list();
+        setTemplates(data);
+      } catch {
+        setTemplates([]);
+      }
+    }
+
+    loadTemplates();
+  }, [])
 
   function Section({
     title,
@@ -217,8 +256,30 @@ export default function EmployeeDetail({ employee }: { employee: Employee }) {
           >
             {tab === "schedule" && (
               <Section title="Horario asignado">
-                {!schedule && <p>No tiene horario asignado</p>}
-                {schedule && <ScheduleContent schedule={schedule} />}
+                {!schedule && (
+                  <div className="flex flex-col gap-3">
+                    <p>No tiene horario asignado</p>
+
+                    <button
+                      onClick={() => setAssignOpen(true)}
+                      className="h-9 px-4 rounded-lg bg-primary text-white text-sm w-fit"
+                    >
+                      Asignar horario
+                    </button>
+                  </div>
+                )}
+                {schedule && (
+                  <div className="flex flex-col gap-4">
+                    <ScheduleContent schedule={schedule} />
+
+                    <button
+                      onClick={() => setAssignOpen(true)}
+                      className="h-9 px-4 rounded-lg border border-border text-sm w-fit"
+                    >
+                      Cambiar horario
+                    </button>
+                  </div>
+                )}
               </Section>
             )}
 
@@ -292,6 +353,61 @@ export default function EmployeeDetail({ employee }: { employee: Employee }) {
         onClose={() => setTempPin(null)}
         title="PIN temporal generado"
       />
+
+      {assignOpen && (
+        <AnimatePresence>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.95 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.95 }}
+              className="bg-white border border-border rounded-2xl p-6 w-full max-w-md flex flex-col gap-4"
+            >
+
+              <h3 className="text-lg font-semibold">
+                Asignar horario
+              </h3>
+
+              <div className="flex flex-col gap-2">
+
+                {templates.map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => handleAssign(t.id)}
+                    disabled={assignLoading}
+                    className="border border-border rounded-lg p-3 text-left hover:bg-surface"
+                  >
+                    <p className="font-medium">{t.name}</p>
+
+                    <div className="text-xs text-text-muted">
+                      {t.days.map((d:any)=>(
+                        <span key={d.id}>
+                          {["Dom","Lun","Mar","Mié","Jue","Vie","Sab"][d.weekday]}{" "}
+                        </span>
+                      ))}
+                    </div>
+
+                  </button>
+                ))}
+
+              </div>
+
+              <button
+                onClick={() => setAssignOpen(false)}
+                className="h-9 px-4 rounded-lg border border-border text-sm"
+              >
+                Cancelar
+              </button>
+
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>
+      )}
     </div>
   );
 }
@@ -382,5 +498,6 @@ function SecurityModal({
         </motion.div>
       </motion.div>
     </AnimatePresence>
-  );
+  );  
 }
+

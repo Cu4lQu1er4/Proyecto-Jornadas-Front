@@ -4,10 +4,12 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { scheduleApi } from "@/lib/api/schedule.api";
 import CreateScheduleModal from "./components/CreateScheduleModal";
+import { toast } from "sonner";
 
 export default function SchedulePage() {
   const [templates, setTemplates] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
   async function load() {
@@ -23,6 +25,18 @@ export default function SchedulePage() {
   useEffect(() => {
     load();
   }, []);
+
+  async function handleDelete(id: string) {
+    if (!confirm("¿Eliminar este horario?")) return;
+
+    try {
+      await scheduleApi.remove(id);
+      toast.success("Horario eliminado");
+      load();
+    } catch {
+      toast.error("No se pudo eliminar el horario");
+    }
+  }
 
   return (
     <main className="min-h-[100dvh] bg-surface px-4 sm:px-6 lg:px-8 py-8">
@@ -99,9 +113,43 @@ export default function SchedulePage() {
                   transition hover:shadow-md
                 "
               >
-                <p className="font-medium text-text">
-                  {t.name}
-                </p>
+                <div className="flex flex-col gap-3">
+                  <p className="font-medium text-text">
+                    {t.name}
+                  </p>
+
+                  <div className="text-xs text-text-muted flex flex-col gap-1">
+                    {t.days?.map((d:any) => (
+                      <span key={d.id}>
+                        {["Lun", "Mar", "Mier", "Jue", "Vie", "Sab", "Dom"][d.weekday]} -
+                        {Math.floor(d.startMinute/60)}:
+                        {String(d.startMinute%60).padStart(2, "0")}
+                        {" - "}
+                        {Math.floor(d.endMinute/60)}:
+                        {String(d.endMinute%60).padStart(2, "0")}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="flex gap-2 pt-2">
+                    <button
+                      onClick={() => setEditing(t)}
+                      className="
+                        text-xs px-3 py-1 border border-border rounded-lg hover:bg-surface"
+                    >
+                      Editar
+                    </button>
+
+                    <button
+                      onClick={() => handleDelete(t.id)}
+                      className="
+                        text-xs px-3 py-1 border border-danger text-danger rounded-lg
+                        hover:bg-danger-soft"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                </div>
               </motion.div>
             ))}
           </div>

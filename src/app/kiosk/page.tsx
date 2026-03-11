@@ -73,15 +73,10 @@ export default function KioskPage() {
       setLoading(true);
       setError(null);
 
-      const res: any = await http("/kiosk/auth", {
+      const data: any = await http("/kiosk/auth", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ document, pin: pinValue }),
       });
-
-      if (!res.ok) throw new Error();
-
-      const data = await res.json();
 
       sessionStorage.setItem("kioskToken", data.kioskToken);
       setKioskToken(data.kioskToken);
@@ -95,37 +90,14 @@ export default function KioskPage() {
       );
 
       setEmployee({ document });
+
       setStatus({
         hasOpenWorkday: false,
         startTime: null,
       });
+
       setPin("");
     } catch (err) {
-      if (!navigator.onLine) {
-        const cached = localStorage.getItem("kioskEmployee");
-
-        if (cached) {
-          const employee = JSON.parse(cached);
-
-          if (employee.document === document) {
-            setEmployee({ document: employee.document });
-
-            setStatus({
-              hasOpenWorkday: false,
-              startTime: null
-            });
-
-            toast.warning("Modo offline");
-            setPin("");
-            return;
-          }
-        }
-
-        toast.error("Sin conexion y empleado no reconocido");
-        setPin("");
-        return;
-      }
-
       toast.error("PIN incorrecto");
       setPin("");
     } finally {
@@ -165,9 +137,11 @@ export default function KioskPage() {
   async function handleMainAction() {
     if (!status || loading) return;
 
-    const url = status.hasOpenWorkday
-      ? "http://localhost:3001/api/kiosk/end"
-      : "http://localhost:3001/api/kiosk/start";
+    const endpoint = status.hasOpenWorkday
+      ? "/kiosk/end"
+      : "/kiosk/start";
+
+    const url = `${process.env.NEXT_PUBLIC_API_URL}${endpoint}`;
 
     const body = JSON.stringify({
       timestamp: new Date().toISOString(),
@@ -198,7 +172,7 @@ export default function KioskPage() {
       }
 
       await queuePunch({
-        url: "http://localhost:3001/api/kiosk/punch",
+        url: `${process.env.NEXT_PUBLIC_API_URL}/kiosk/punch`,
         headers: {
           "Content-Type": "application/json",
         },

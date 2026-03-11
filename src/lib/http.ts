@@ -19,6 +19,6 @@ export async function http<T>(
   }
 
   const text = await res.text();
-  return text ? JSON.parse(text) : null;
+  return text ? (JSON.parse(text) as T) : (null as unknown as T);
 
 }

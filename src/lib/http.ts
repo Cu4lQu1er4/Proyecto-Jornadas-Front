@@ -18,5 +18,7 @@ export async function http<T>(
     throw error;
   }
 
-  return res.json();
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+
 }

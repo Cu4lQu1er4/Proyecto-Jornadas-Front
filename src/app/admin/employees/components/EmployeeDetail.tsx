@@ -79,8 +79,9 @@ export default function EmployeeDetail({ employee }: { employee: Employee }) {
         employee.id,
         templateId
       );
-
       
+      await loadSchedule();
+
       const updated = await employeeScheduleApi.current(employee.id);
       setSchedule(updated);
       toast.success("Horario asignado");
@@ -97,16 +98,17 @@ export default function EmployeeDetail({ employee }: { employee: Employee }) {
       setAssignLoading(false);
     }
   }
-
-  useEffect(() => {
-    async function loadSchedule() {
-      try {
-        const data = await employeeScheduleApi.current(employee.id);
-        setSchedule(data);
-      } catch {
-        setSchedule(null);
-      }
+   
+  async function loadSchedule() {
+    try {
+      const data = await employeeScheduleApi.current(employee.id);
+      setSchedule(data);
+    } catch {
+      setSchedule(null);
     }
+  }
+  
+  useEffect(() => {
     loadSchedule();
   }, [employee.id]);
 

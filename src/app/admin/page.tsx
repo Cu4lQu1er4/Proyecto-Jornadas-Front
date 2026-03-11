@@ -17,13 +17,13 @@ export default function AdminDashboard() {
     async function load() {
       try {
         const [employeesRes, periodsRes, liveRes] = await Promise.all([
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/work/admin/employees`, {
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/work/admin/employees`, {
             credentials: "include",
           }),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/work/periods`, {
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/work/periods`, {
             credentials: "include",
           }),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/work/admin/live-workdays`, {
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/work/admin/live-workdays`, {
             credentials: "include",
           }),
         ]);

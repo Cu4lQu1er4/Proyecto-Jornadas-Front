@@ -109,22 +109,19 @@ export default function KioskPage() {
     if (!kioskToken) return;
 
     try {
-      const res: any = await http("/kiosk/status", {
+      const data: any = await http("/kiosk/status", {
         headers: {
           Authorization: `Bearer ${kioskToken}`,
         },
       });
 
-      if (res.status === 401) {
+      setStatus(data);
+    } catch (err:any) {
+      if (err?.status === 401) {
         handleLogout();
         return;
       }
 
-      if (!res.ok) throw new Error();
-
-      const data = await res.json();
-      setStatus(data);
-    } catch {
       console.log("Offline - no se pudo obtener el estado");
 
       setStatus({
@@ -162,7 +159,11 @@ export default function KioskPage() {
       if (!res.ok) throw new Error();
 
       await fetchStatus();
-    } catch {
+    } catch (err) {
+      if (navigator.onLine) {
+        toast.error("Error al registrat jornada");
+      }
+      
       const cached = localStorage.getItem("kioskEmployee");
       const employee = cached ? JSON.parse(cached) : null;
 

@@ -19,14 +19,9 @@ export default function CurrentWorkdayCard() {
 
   async function fetchDay() {
     try {
-      const res: any = await http(
-        "/work/my-day",
-      );
+      const data: DaySummary = await http("/work/my-day");
 
-      if (!res.ok) return;
-
-      const json = await res.json();
-      setData(json);
+      setData(data);
     } catch {
       console.error("Error cargando jornada");
     } finally {

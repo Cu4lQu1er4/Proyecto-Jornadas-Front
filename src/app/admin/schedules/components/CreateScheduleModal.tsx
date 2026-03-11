@@ -70,14 +70,21 @@ export default function CreateScheduleModal({
     setLoading(true);
 
     try {
+
+      const payload = {
+        days: days.map((d) => ({
+          weekday: d.weekday,
+          startMinute: d.startMinute,
+          endMinute: d.endMinute,
+        })),
+      };
+
       if (editing) {
-        await scheduleApi.update(editing.id, {
-          name, days,
-        });
+        await scheduleApi.update(editing.id, payload);
 
         toast.success("Horario actualizado");
       } else {
-        await scheduleApi.create({ name, days });
+        await scheduleApi.create(payload);
 
         toast.success("Horario creado");
       }

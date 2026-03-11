@@ -76,7 +76,7 @@ export default function OnboardingForm() {
     setLoading(true);
 
     try {
-      await http("/work/complete-profile", {
+      const user = await http("/work/complete-profile", {
         method: "PATCH",
         body: JSON.stringify({
           firstName: cleanFirstName,
@@ -90,7 +90,12 @@ export default function OnboardingForm() {
 
       toast.success("Perfil configurado correctamente");
 
-      router.refresh(); // deja que el server redirija según rol
+      if (user.role === "ADMIN") {
+        router.replace("/admin");
+      } else {
+        router.replace("/employee");
+      }
+
     } catch (error: any) {
       toast.error(error?.message || "No se pudo completar el perfil");
     } finally {

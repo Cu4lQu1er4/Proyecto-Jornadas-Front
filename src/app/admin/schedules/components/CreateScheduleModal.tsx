@@ -72,6 +72,7 @@ export default function CreateScheduleModal({
     try {
 
       const payload = {
+        name: name.trim(),
         days: days.map((d) => ({
           weekday: d.weekday,
           startMinute: d.startMinute,

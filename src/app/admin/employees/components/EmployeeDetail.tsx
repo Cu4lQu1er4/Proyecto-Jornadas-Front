@@ -80,10 +80,10 @@ export default function EmployeeDetail({ employee }: { employee: Employee }) {
         templateId
       );
 
-      toast.success("Horario asignado");
-
+      
       const updated = await employeeScheduleApi.current(employee.id);
       setSchedule(updated);
+      toast.success("Horario asignado");
 
       setAssignOpen(false);
     } catch {

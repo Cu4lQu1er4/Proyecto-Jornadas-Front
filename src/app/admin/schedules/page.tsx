@@ -157,6 +157,7 @@ export default function SchedulePage() {
 
         {open && (
           <CreateScheduleModal
+            editing={editing}
             onClose={() => setOpen(false)}
             onCreated={load}
           />

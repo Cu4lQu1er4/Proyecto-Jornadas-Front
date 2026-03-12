@@ -36,7 +36,7 @@ export default function AdminDashboard() {
           totalEmployees: employees.length,
           openPeriods:
             periodsData.items?.filter((p: any) => !p.closedAt).length ?? 0,
-          openWorkdays: liveData.count ?? 0,
+          openWorkdays: liveData.length ?? 0,
         });
 
       } catch (err) {

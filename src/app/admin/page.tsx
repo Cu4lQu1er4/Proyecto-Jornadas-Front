@@ -30,13 +30,16 @@ export default function AdminDashboard() {
 
       const employees = employeesRes.ok ? await employeesRes.json() : [];
       const periodsData = periodsRes.ok ? await periodsRes.json() : { items: [] };
-      const liveData = liveRes.ok ? await liveRes.json() : { count: 0 };
+      const liveData = liveRes.ok 
+        ? await liveRes.json() 
+        : { count: 0, employees: [] };
 
       setData({
         totalEmployees: employees.length,
         openPeriods:
           periodsData.items?.filter((p: any) => !p.closedAt).length ?? 0,
         openWorkdays: liveData.count ?? 0,
+        activeEmployees: liveData.employees ?? [],
       });
 
     } catch (err) {

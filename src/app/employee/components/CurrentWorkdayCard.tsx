@@ -16,12 +16,14 @@ type DaySummary = {
 export default function CurrentWorkdayCard() {
   const [data, setData] = useState<DaySummary | null>(null);
   const [loading, setLoading] = useState(true);
+  const [lastSync, setLastSync] = useState<number>(Date.now());
 
   async function fetchDay() {
     try {
       const data: DaySummary = await http("/work/my-day");
 
       setData(data);
+      setLastSync(Date.now);
     } catch {
       console.error("Error cargando jornada");
     } finally {
@@ -33,13 +35,12 @@ export default function CurrentWorkdayCard() {
     fetchDay();
   }, []);
 
-  // 🔁 Polling SOLO si está abierta
   useEffect(() => {
     if (!data?.isOpen) return;
 
     const interval = setInterval(() => {
       fetchDay();
-    }, 30000); // cada 30 segundos
+    }, 30000);
 
     return () => clearInterval(interval);
   }, [data?.isOpen]);
@@ -74,8 +75,15 @@ export default function CurrentWorkdayCard() {
     isOpen,
   } = data;
 
-  const workedH = Math.floor(workedMinutes / 60);
-  const workedM = workedMinutes % 60;
+  let dynamicWorkedMinutes = workedMinutes;
+
+  if (data?.isOpen) {
+    const secondsSinceSync = Math.floor((Date.now() - lastSync) / 1000);
+    dynamicWorkedMinutes += Math.floor(secondsSinceSync / 60);
+  }
+
+  const workedH = Math.floor(dynamicWorkedMinutes / 60);
+  const workedM = dynamicWorkedMinutes % 60;
 
   const expectedH = Math.floor(expectedMinutes / 60);
   const expectedM = expectedMinutes % 60;

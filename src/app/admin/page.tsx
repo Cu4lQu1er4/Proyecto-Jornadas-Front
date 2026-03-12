@@ -13,7 +13,7 @@ export default function AdminDashboard() {
 
   const [loading, setLoading] = useState(true);
 
-  async function load() {
+  const load = async () => {
     try {
       const [employeesRes, periodsRes, liveRes] = await Promise.all([
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/work/admin/employees`, {
@@ -35,7 +35,7 @@ export default function AdminDashboard() {
         totalEmployees: employees.length,
         openPeriods:
           periodsData.items?.filter((p: any) => !p.closedAt).length ?? 0,
-        openWorkdays: liveData.length ?? 0,
+        openWorkdays: liveData.count ?? 0,
       });
 
     } catch (err) {

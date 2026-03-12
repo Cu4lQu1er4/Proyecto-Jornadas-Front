@@ -69,7 +69,7 @@ export default function AdminCasesList({
 
       const message =
         err?.response?.data?.message ||
-        err?:message ||
+        err?.message ||
         "No se pudo aprobar el caso";
       toast.error(message)
     }

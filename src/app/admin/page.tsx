@@ -13,40 +13,46 @@ export default function AdminDashboard() {
 
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const [employeesRes, periodsRes, liveRes] = await Promise.all([
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/work/admin/employees`, {
-            credentials: "include",
-          }),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/work/periods`, {
-            credentials: "include",
-          }),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/work/admin/live-workdays`, {
-            credentials: "include",
-          }),
-        ]);
+  async function load() {
+    try {
+      const [employeesRes, periodsRes, liveRes] = await Promise.all([
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/work/admin/employees`, {
+          credentials: "include",
+        }),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/work/periods`, {
+          credentials: "include",
+        }),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/work/admin/live-workdays`, {
+          credentials: "include",
+        }),
+      ]);
 
-        const employees = employeesRes.ok ? await employeesRes.json() : [];
-        const periodsData = periodsRes.ok ? await periodsRes.json() : { items: [] };
-        const liveData = liveRes.ok ? await liveRes.json() : { count: 0 };
+      const employees = employeesRes.ok ? await employeesRes.json() : [];
+      const periodsData = periodsRes.ok ? await periodsRes.json() : { items: [] };
+      const liveData = liveRes.ok ? await liveRes.json() : { count: 0 };
 
-        setData({
-          totalEmployees: employees.length,
-          openPeriods:
-            periodsData.items?.filter((p: any) => !p.closedAt).length ?? 0,
-          openWorkdays: liveData.length ?? 0,
-        });
+      setData({
+        totalEmployees: employees.length,
+        openPeriods:
+          periodsData.items?.filter((p: any) => !p.closedAt).length ?? 0,
+        openWorkdays: liveData.length ?? 0,
+      });
 
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
+  }
 
+  useEffect(() => {
     load();
+
+    const interval = setInterval(() => {
+      load();
+    }, 10000);
+
+    return () => clearInterval(interval);
   }, []);
 
   return (

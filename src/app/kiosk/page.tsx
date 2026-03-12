@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { queuePunch, syncQueue, syncEmployees } from "@/lib/kioskQueue";
 import { http } from "@/lib/http";
-import Head from "next/head";
+import Head from "./head";
 
 type WorkdayStatus = {
   hasOpenWorkday: boolean;
@@ -231,11 +231,6 @@ export default function KioskPage() {
 
   if (!employee) {
     return (
-      <>
-      <Head>
-        <link rel="manifest" href="/kiosk-manifest.json" />
-      </Head>
-
       <main className="min-h-screen flex items-center justify-center bg-background p-4">
         <motion.div
           initial={{ scale: 0.95, opacity: 0 }}
@@ -308,16 +303,11 @@ export default function KioskPage() {
           )}
         </motion.div>
       </main>
-      </>
     );
   }
 
 
   return (
-    <>
-    <Head>
-        <link rel="manifest" href="/kiosk-manifest.json" />
-      </Head>
     <div className="min-h-screen flex items-center justify-center bg-surface px-4">
       <motion.div
         initial={{ opacity: 0 }}
@@ -374,6 +364,5 @@ export default function KioskPage() {
         )}
       </motion.div>
     </div>
-    </>
   );
 }

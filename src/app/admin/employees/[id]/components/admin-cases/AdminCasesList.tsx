@@ -64,8 +64,14 @@ export default function AdminCasesList({
       await adminCaseApi.approve(id);
       toast.success("Caso aprobado correctamente");
       onReload();
-    } catch {
-      toast.error("No se pudo aprobar el caso");
+    } catch (err: any) {
+      console.error(err)
+
+      const message =
+        err?.response?.data?.message ||
+        err?:message ||
+        "No se pudo aprobar el caso";
+      toast.error(message)
     }
   }
 

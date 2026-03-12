@@ -9,6 +9,7 @@ export default function AdminDashboard() {
     totalEmployees: 0,
     openPeriods: 0,
     openWorkdays: 0,
+    activeEmployees: [] as any[],
   });
 
   const [loading, setLoading] = useState(true);
@@ -98,6 +99,36 @@ export default function AdminDashboard() {
             value={loading ? "..." : data.totalEmployees}
           />
         </motion.section>
+
+        {data.activeEmployees?.length > 0 && (
+          <motion.section
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="bg-white border border-border rounded-2xl p-6"
+          >
+            <h2 className="text-lg font-semibold mb-4">
+              Empleados en jornada
+            </h2>
+
+            <div className="flex flex-col gap-3">
+              {data.activeEmployees.map((emp: any) => (
+                <div
+                  key={emp.id}
+                  className="flex justify-between items-center border-b border-border pb-2 last:border-none"
+                >
+                  <span className="font-medium">
+                    {emp.name || emp.document}
+                  </span>
+
+                  <span className="text-sm text-text-muted">
+                    Desde {new Date(emp.startTime).toLocaleTimeString()}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </motion.section>
+        )}
 
       </div>
     </main>

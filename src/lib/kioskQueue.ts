@@ -78,7 +78,7 @@ export async function syncEmployees() {
 
   try {
 
-    const res = await fetch("http://localhost:3001/api/kiosk/employees");
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/kiosk/employees`);
 
     if (!res.ok) return;
 

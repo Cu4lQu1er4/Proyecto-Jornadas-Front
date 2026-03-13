@@ -106,11 +106,11 @@ export default function AttachmentViewerModal({
         <div className="flex-1 overflow-auto bg-surface">
           {pdf ? (
             <PdfViewer
-              url={`http://localhost:3001/api/admin/admin-cases/attachments/${attachment.id}`}
+              url={`${process.env.NEXT_PUBLIC_API_URL}/admin/admin-cases/attachments/${attachment.id}`}
             />
           ) : (
             <img
-              src={`http://localhost:3001/api/admin/admin-cases/attachments/${attachment.id}`}
+              src={`${process.env.NEXT_PUBLIC_API_URL}/admin/admin-cases/attachments/${attachment.id}`}
               className="max-h-[75vh] w-auto object-contain p-4"
             />
           )}  

@@ -1,5 +1,5 @@
 export const metadata = {
-  manifest: "/kiosk/manifest.ts",
+  manifest: "/kiosk/manifest.json",
 };
 
 export default function KioskLayout({

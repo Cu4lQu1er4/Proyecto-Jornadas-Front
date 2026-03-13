@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { queuePunch, syncQueue, syncEmployees } from "@/lib/kioskQueue";
 import { http } from "@/lib/http";
-import Head from "./head";
 
 type WorkdayStatus = {
   hasOpenWorkday: boolean;

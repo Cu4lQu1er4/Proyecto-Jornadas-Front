@@ -3,6 +3,7 @@ import "./globals.css";
 import { DM_Sans } from "next/font/google";
 import { Toaster } from "sonner";
 import RegisterSW from "./register-sw";
+import SessionLoader from "@/components/SessionLoader";
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
@@ -31,6 +32,7 @@ export default function RootLayout({
       <body
         className="font-sans"
       >
+        <SessionLoader />
         <RegisterSW />
         {children}
         <Toaster 

@@ -224,15 +224,24 @@ export default function KioskPage() {
     try {
       setLoading(true);
 
-      await http("/kiosk/mark", {
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/kiosk/mark`;
+
+      const res = await fetch(url, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${kioskToken}`,
+          "Content-Type": "application/json",
           "x-client": "kiosk",
         },
         body: JSON.stringify({ type }),
       });
 
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({}));
+        throw new Error(error.message || "Error");
+      }
+
+      await fetchStatus();
       await fetchNextActions();
     } catch (err: any) {
       toast.error(err?.message || "Error");

@@ -228,6 +228,7 @@ export default function KioskPage() {
         method: "POST",
         headers: {
           Authorization: `Bearer ${kioskToken}`,
+          "x-client": "kiosk",
         },
         body: JSON.stringify({ type }),
       });

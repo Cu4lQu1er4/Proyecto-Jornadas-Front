@@ -24,6 +24,7 @@ export default function KioskPage() {
   const [now, setNow] = useState(new Date());
   const [pin, setPin] = useState("");
   const [kioskToken, setKioskToken] = useState<string | null>(null);
+  const [allowedActions, setAllowedActions] = useState<string[]>([]);
 
   useEffect(() => {
     const saved = sessionStorage.getItem("kioskToken");
@@ -42,7 +43,10 @@ export default function KioskPage() {
   }, []);
 
   useEffect(() => {
-    if (employee) fetchStatus();
+    if (employee) {
+      fetchStatus();
+      fetchNextActions();
+    }
   }, [employee]);
 
   useEffect(() => {
@@ -159,6 +163,7 @@ export default function KioskPage() {
       if (!res.ok) throw new Error();
 
       await fetchStatus();
+      await fetchNextActions();
     } catch (err) {
       if (navigator.onLine) {
         toast.error("Error al registrat jornada");
@@ -194,6 +199,42 @@ export default function KioskPage() {
       });
 
       toast.warning("Sin internet. Registro guardado");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function fetchNextActions() {
+    if (!kioskToken) return;
+
+    try {
+      const data: any = await http("/kiosk/next-actions", {
+        headers: {
+          Authorization: `Bearer ${kioskToken}`,
+        },
+      });
+
+      setAllowedActions(data.allowed);
+    } catch (err) {
+      console.log("No se pudo obtener las acciones");
+    }
+  }
+
+  async function handleMark(type: string) {
+    try {
+      setLoading(true);
+
+      await http("/kiosk/mark", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${kioskToken}`,
+        },
+        body: JSON.stringify({ type }),
+      });
+
+      await fetchNextActions();
+    } catch (err: any) {
+      toast.error(err?.message || "Error");
     } finally {
       setLoading(false);
     }
@@ -360,6 +401,62 @@ export default function KioskPage() {
           <p className="text-sm text-danger font-medium">
             {error}
           </p>
+        )}
+
+        {status?.hasOpenWorkday && (
+          <div className="flex flex-col gap-4">
+            {allowedActions.includes("BREAK_START") && (
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                onClick={() => handleMark("BREAK_START")}
+                disabled={loading}
+                className="
+                  w-full rounded-2xl py-6 text-xl font-semibold text-white
+                  bg-yellow-500 disabled:opacity-60"
+              >
+                Salir a break
+              </motion.button>
+            )}
+
+            {allowedActions.includes("BREAK_END") && (
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                onClick={() => handleMark("BREAK_END")}
+                disabled={loading}
+                className="
+                  w-full rounded-2xl py-6 text-xl font-semibold text-white
+                  bg-blue-500 disabled:opacity-60"
+              >
+                Volver de break
+              </motion.button>
+            )}
+
+            {allowedActions.includes("LUNCH_START") && (
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                onClick={() => handleMark("LUNCH_START")}
+                disabled={loading}
+                className="
+                  w-full rounded-2xl py-6 text-sl font-semibold text-white
+                  bg-orange-500 disabled:opacity-60"
+              >
+                Salir a almuerzo
+              </motion.button>
+            )}
+
+            {allowedActions.includes("LUNCH_END") && (
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                onClick={() => handleMark("LUNCH_END")}
+                disabled={loading}
+                className="
+                  w-full rounded-2xl py-6 text-xl font-semibold text-white
+                  bg-green-500 disabled:opacity-60"
+              >
+                Volver de almuerzo
+              </motion.button>
+            )}
+          </div>
         )}
       </motion.div>
     </div>

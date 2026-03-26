@@ -227,6 +227,7 @@ export default function KioskPage() {
       const url = `${process.env.NEXT_PUBLIC_API_URL}/kiosk/mark`;
 
       const res = await fetch(url, {
+        cache: "no-store",
         method: "POST",
         headers: {
           Authorization: `Bearer ${kioskToken}`,

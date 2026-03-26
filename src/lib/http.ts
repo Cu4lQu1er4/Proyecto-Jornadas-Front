@@ -8,6 +8,7 @@ export async function http<T>(
   const url = `${API_URL}${path}`;
 
   const res = await fetch(url, {
+    cache: "no-store",
     credentials: "include",
     headers: {
       "Content-Type": "application/json",

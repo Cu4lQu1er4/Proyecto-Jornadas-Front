@@ -407,60 +407,62 @@
             </p>
           )}
 
-          <div className="mt-4 text-sm text-gray-400 font-semibold">
-            Pausas
-          </div>
-
           {status?.hasOpenWorkday && (
-            <div className="grid grid-cols-2 gap-4 mt-6">
-              {allowedActions.includes("BREAK_START") && (
-                <motion.button
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => handleMark("BREAK_START")}
-                  disabled={loading}
-                  className="
-                    h-24 rounded-2xl text-xl font-semibold text-white bg-yellow-500"
-                >
-                  Salir a break
-                </motion.button>
-              )}
+            <div className="flex flex-col gap-4 mt-6">
 
-              {allowedActions.includes("BREAK_END") && (
-                <motion.button
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => handleMark("BREAK_END")}
-                  disabled={loading}
-                  className="
-                    h-24 rounded-2xl text-xl font-semibold text-white bg-yellow-700"
-                >
-                  Volver de break
-                </motion.button>
-              )}
+              <div className="text-center text-sm font-semibold text-gray-500">
+                Pausas
+              </div>
+              <div className="grid grid-cols-2 gap-4 mt-6">
+                {allowedActions.includes("BREAK_START") && (
+                  <motion.button
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => handleMark("BREAK_START")}
+                    disabled={loading}
+                    className="
+                      h-24 rounded-2xl text-xl font-semibold text-white bg-yellow-500"
+                  >
+                    Salir a break
+                  </motion.button>
+                )}
 
-              {allowedActions.includes("LUNCH_START") && (
-                <motion.button
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => handleMark("LUNCH_START")}
-                  disabled={loading}
-                  className="
-                    h-24 rounded-2xl text-xl font-semibold text-white bg-orange-500"
-                >
-                  Salir a almuerzo
-                </motion.button>
-              )}
+                {allowedActions.includes("BREAK_END") && (
+                  <motion.button
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => handleMark("BREAK_END")}
+                    disabled={loading}
+                    className="
+                      h-24 rounded-2xl text-xl font-semibold text-white bg-yellow-700"
+                  >
+                    Volver de break
+                  </motion.button>
+                )}
 
-              {allowedActions.includes("LUNCH_END") && (
-                <motion.button
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => handleMark("LUNCH_END")}
-                  disabled={loading}
-                  className="
-                    h-24 rounded-2xl text-xl font-semibold text-white bg-orange-700"
-                >
-                  Volver de almuerzo
-                </motion.button>
-              )}
-            </div>
+                {allowedActions.includes("LUNCH_START") && (
+                  <motion.button
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => handleMark("LUNCH_START")}
+                    disabled={loading}
+                    className="
+                      h-24 rounded-2xl text-xl font-semibold text-white bg-orange-500"
+                  >
+                    Salir a almuerzo
+                  </motion.button>
+                )}
+
+                {allowedActions.includes("LUNCH_END") && (
+                  <motion.button
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => handleMark("LUNCH_END")}
+                    disabled={loading}
+                    className="
+                      h-24 rounded-2xl text-xl font-semibold text-white bg-orange-700"
+                  >
+                    Volver de almuerzo
+                  </motion.button>
+                )}
+              </div>
+            </div> 
           )}
 
           <button

@@ -14,7 +14,7 @@ export default function SessionLoader () {
         router.replace("/login");
       }
     });
-  }, [pathname]);
+  }, [pathname, router]);
 
   return null;
 }

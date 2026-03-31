@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { employeeAdminCaseApi } from "@/lib/api/employeeAdminCase.api";
 import { toast } from "sonner";
+import imageCompression from "browser-image-compression";
 
 type Props = {
   onClose: () => void;
@@ -50,6 +51,26 @@ export default function CreateEmployeeCaseModal({
     return dates;
   }
 
+  async function processFile(files: File[]) {
+    const result: File[] = [];
+
+    for (const file of files) {
+      if (file.type.startsWith("image/")) {
+        const compressed = await imageCompression(file, {
+          maxSizeMB: 1,
+          maxWidthOrHeight: 1280,
+          useWebWorker: true,
+        });
+
+        result.push(compressed);
+      } else {
+        result.push(file);
+      }
+    }
+
+    return result;
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (loading) return;
@@ -94,11 +115,13 @@ export default function CreateEmployeeCaseModal({
         endMinute: singleDay && endMinute ? timeToMinutes(endMinute) : null,
       }));
 
+      const processedFiles = await processFile(files);
+
       const newCase = await employeeAdminCaseApi.create({
         type,
         notes: notes?.trim() || undefined,
         scopes,
-        files,
+        files: processedFiles,
       });
 
       toast.success("Solicitud enviada correctamente");

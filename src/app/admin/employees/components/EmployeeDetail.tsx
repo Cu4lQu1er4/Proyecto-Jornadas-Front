@@ -325,6 +325,13 @@ export default function EmployeeDetail({ employee }: { employee: Employee }) {
         <Section title="Horario asignado">
           {!schedule && <p>No tiene horario asignado</p>}
           {schedule && <ScheduleContent schedule={schedule} />}
+
+          <button
+            onClick={() => setAssignOpen(true)}
+            className="h-9 px-4 rounded-lg border border-border text-sm w-fit"
+          >
+            Cambiar horario
+          </button>
         </Section>
 
         <Section title="Períodos">

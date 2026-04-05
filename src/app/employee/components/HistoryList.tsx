@@ -22,21 +22,18 @@ type HistoryEntry = {
 };
 
 type Props = {
-  period: {
-    startDate: string;
-    endDate: string;
-  } | null;
+  periodId: string | null;
   onTotalMinutes?: (minutes: number) => void;
 };
 
-export default function HistoryList({ period, onTotalMinutes }: Props) {
+export default function HistoryList({ periodId, onTotalMinutes }: Props) {
   const [items, setItems] = useState<HistoryEntry[]>([]);
   const [summary, setSummary] = useState<HistorySummary | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!period) return;
+    if (!periodId) return;
 
     async function loadHistory() {
       setLoading(true);
@@ -46,12 +43,8 @@ export default function HistoryList({ period, onTotalMinutes }: Props) {
         const data = await http<{
           entries: HistoryEntry[];
           summary: HistorySummary;
-        }>(
-          `/work/history?from=${encodeURIComponent(
-            period!.startDate
-          )}&to=${encodeURIComponent(period!.endDate)}`
-        );
-        
+        }>(`/work/history?periodId=${periodId}`);
+
         setItems(data.entries ?? []);
         setSummary(data.summary ?? null);
 
@@ -66,9 +59,9 @@ export default function HistoryList({ period, onTotalMinutes }: Props) {
     }
 
     loadHistory();
-  }, [period, onTotalMinutes]);
+  }, [periodId, onTotalMinutes]);
 
-  if (!period) {
+  if (!periodId) {
     return (
       <p className="text-sm text-text-muted">
         Selecciona un período

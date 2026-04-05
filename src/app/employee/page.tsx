@@ -153,7 +153,7 @@ export default function EmployeePage() {
 
           <div className="flex flex-col gap-4 max-h-[60vh] overflow-y-auto">
             <HistoryList
-              periodId={selectedPeriod}
+              periodId={selectedPeriod?.id ?? null}
               onTotalMinutes={handleTotalMinutes}
             />
           </div>

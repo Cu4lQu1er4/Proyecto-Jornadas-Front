@@ -11,6 +11,7 @@ export default function SchedulePage() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   async function load() {
     try {
@@ -27,14 +28,14 @@ export default function SchedulePage() {
   }, []);
 
   async function handleDelete(id: string) {
-    if (!confirm("¿Eliminar este horario?")) return;
-
     try {
       await scheduleApi.remove(id);
       toast.success("Horario eliminado");
       load();
     } catch {
       toast.error("No se pudo eliminar el horario");
+    } finally {
+      setDeleteId(null);
     }
   }
 
@@ -147,7 +148,7 @@ export default function SchedulePage() {
                     </button>
 
                     <button
-                      onClick={() => handleDelete(t.id)}
+                      onClick={() => setDeleteId(t.id)}
                       className="
                         text-xs px-3 py-1 border border-danger text-danger rounded-lg
                         hover:bg-danger-soft"
@@ -172,6 +173,48 @@ export default function SchedulePage() {
           />
         )}
 
+        {deleteId && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="
+              fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.95 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.95 }}
+              className="
+                bg-white bprder border-border rounded-2xl p-6 w-full max-w-sm
+                flex flex-col gap-4"
+            >
+              <h3 className="text-lg font-semibold">
+                Eliminar horario
+              </h3>
+
+              <p className="text-sm text-text-muted">
+                ¿Estas segudo de eliminar este horario?
+              </p>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  onClick={() => setDeleteId(null)}
+                  className="h-9 px-4 rounded-lg border border-border text-sm"
+                >
+                  Cancelar
+                </button>
+
+                <button
+                  onClick={() => handleDelete(deleteId)}
+                  className="h-9 px-4 rpunded-lg bg-danger text-white text-sm"
+                >
+                  Eliminar
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
       </div>
     </main>
   );

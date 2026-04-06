@@ -76,7 +76,7 @@ export default function OnboardingForm() {
     setLoading(true);
 
     try {
-      const user = await http<{ role: "ADMIN" | "EMPLOYEE" }>("/work/complete-profile", {
+      const user = await http<{ role: "EMPLOYEE" }>("/work/complete-profile", {
         method: "PATCH",
         body: JSON.stringify({
           firstName: cleanFirstName,
@@ -90,9 +90,7 @@ export default function OnboardingForm() {
 
       toast.success("Perfil configurado correctamente");
 
-      if (user.role === "ADMIN") {
-        router.replace("/admin");
-      } else {
+      if (user.role === "EMPLOYEE") {
         router.replace("/employee");
       }
 

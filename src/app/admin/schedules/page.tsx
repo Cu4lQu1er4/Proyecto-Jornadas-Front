@@ -207,7 +207,7 @@ export default function SchedulePage() {
 
                 <button
                   onClick={() => handleDelete(deleteId)}
-                  className="h-9 px-4 rpunded-lg bg-danger text-white text-sm"
+                  className="h-9 px-4 rounded-lg bg-danger text-white text-sm"
                 >
                   Eliminar
                 </button>

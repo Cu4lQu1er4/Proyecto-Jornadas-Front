@@ -46,6 +46,7 @@ export default function AdminSidebar({ onNavigate }: Props) {
         <Link
           key={item.label}
           href={item.href}
+          onClick={onNavigate}
           className="
             flex items-center gap-3
             p-4

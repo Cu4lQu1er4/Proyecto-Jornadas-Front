@@ -13,9 +13,10 @@ type Summary = {
   rows: {
     employeeId: string;
     document: string;
-    workedMinutes: number;
+    workedDays: number;
     absences: number;
     justified: number;
+    partial: number;
     status: string;
   }[];
 };
@@ -126,15 +127,14 @@ export default function AdminReportsPage() {
               />
 
               <SummaryCard
-                label="Inasistencias"
+                label="Total ausencias (dias)"
                 value={data.totalAbsences}
                 danger
               />
 
               <SummaryCard
-                label="Justificaciones"
+                label="Total justificados (dias)"
                 value={data.totalJustified}
-                warning
               />
             </motion.section>
 
@@ -173,10 +173,6 @@ export default function AdminReportsPage() {
                         <span className="font-medium text-text">
                           {row.document}
                         </span>
-
-                        <span className="text-text-muted text-xs">
-                          Trabajado: {formatMinutes(row.workedMinutes)}
-                        </span>
                       </div>
 
                       {/* METRICAS */}
@@ -184,20 +180,35 @@ export default function AdminReportsPage() {
                         flex flex-wrap gap-2
                         lg:items-center
                       ">
+                        <Badge success>
+                          Trabajados: {row.workedDays}
+                        </Badge>
+
                         <Badge danger>
-                          Inasistencias: {row.absences}
+                          Ausencias: {row.absences}
                         </Badge>
 
                         <Badge warning>
-                          Justificado: {row.justified}
+                          Justificados: {row.justified}
+                        </Badge>
+
+                        <Badge>
+                          Parciales: {row.partial}
                         </Badge>
 
                         <Badge
                           success={row.status !== "IRREGULAR"}
                           danger={row.status === "IRREGULAR"}
                         >
-                          {row.status}
+                          {row.status === "OK" ? "Correcto" : "Irregular"}
                         </Badge>
+
+                        {row.workedDays === 0 &&
+                         row.absences === 0 &&
+                         row.justified === 0 &&
+                         row.partial === 0 && (
+                          <Badge>Sin registros</Badge>
+                        )}
                       </div>
 
                     </motion.div>

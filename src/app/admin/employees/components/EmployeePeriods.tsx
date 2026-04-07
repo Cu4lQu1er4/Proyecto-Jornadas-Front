@@ -2,15 +2,18 @@
 
 import { http } from "@/lib/http";
 import { useEffect, useState } from "react";
+import { formatMinutes } from "@/lib/utils/time";
 
 type Period = {
   id: string;
   startDate: string;
   endDate: string;
   closedAt: string | null;
-  totalWorked: number;
-  totalExpected: number;
-  totalDelta: number;
+  workedDays: number;
+  absences: number;
+  justified: number;
+  partial: number;
+  totalDeltaMinutes: number;
 };
 
 export default function EmployeePeriods({
@@ -56,15 +59,8 @@ export default function EmployeePeriods({
     <div className="flex flex-col gap-4">
       {periods.map((p) => {
         const isClosed = !!p.closedAt;
-        const delta = p.totalDelta;
+        const delta = p.totalDeltaMinutes;
         const isIrregular = isClosed && delta !== 0;
-
-        const deltaLabel =
-          delta > 0
-            ? `+${delta} min`
-            : delta < 0
-            ? `${delta} min`
-            : "0 min";
 
         const deltaStyle =
           delta < 0
@@ -88,6 +84,26 @@ export default function EmployeePeriods({
                   {new Date(p.startDate).toLocaleDateString()} -{" "}
                   {new Date(p.endDate).toLocaleDateString()}
                 </span>
+
+                <div className="flex flex-wrap gap-2 text-xs">
+                  <span className="bg-success-soft text-success px-2 py-1 rounded-full">
+                    {p.workedDays} trabajados
+                  </span>
+
+                  <span className="bg-danger-soft text-danger px-2 py-1 rounded-full">
+                    {p.absences} ausencias
+                  </span>
+
+                  <span className="bg-warning-soft text-warning px-2 py-1 rounded-full">
+                    {p.justified} justificados
+                  </span>
+
+                  {p.partial > 0 && (
+                    <span className="bg-primary-soft text-primary px-2 py-1 rounded-full">
+                      {p.partial} parciales
+                    </span>
+                  )}
+                </div>
 
                 <div className="flex flex-wrap items-center gap-3 text-sm text-text-muted">
                   {isClosed ? (
@@ -114,7 +130,7 @@ export default function EmployeePeriods({
                 <span
                   className={`px-3 py-1 rounded-full text-sm font-medium ${deltaStyle}`}
                 >
-                  {deltaLabel}
+                  {formatMinutes(delta)}
                 </span>
               )}
 

@@ -2,6 +2,7 @@
 
 import { http } from "@/lib/http";
 import { useEffect, useState } from "react";
+import { formatMinutes } from "@/lib/utils/time";
 
 type HistorySummary = {
   totalWorkedMinutes: number;
@@ -105,8 +106,7 @@ export default function HistoryList({ periodId, onTotalMinutes }: Props) {
               Total esperado
             </span>
             <span className="font-medium text-text">
-              {Math.floor(summary.totalExpectedMinutes / 60)}h{" "}
-              {summary.totalExpectedMinutes % 60}m
+              {formatMinutes(summary.totalExpectedMinutes)}
             </span>
           </div>
 
@@ -115,8 +115,7 @@ export default function HistoryList({ periodId, onTotalMinutes }: Props) {
               Total trabajado
             </span>
             <span className="font-medium text-text">
-              {Math.floor(summary.totalWorkedMinutes / 60)}h{" "}
-              {summary.totalWorkedMinutes % 60}m
+              {formatMinutes(summary.totalWorkedMinutes)}
             </span>
           </div>
 
@@ -132,9 +131,7 @@ export default function HistoryList({ periodId, onTotalMinutes }: Props) {
                   : "text-danger"
               }
             >
-              {summary.totalDeltaMinutes >= 0 ? "+" : "-"}
-              {Math.floor(Math.abs(summary.totalDeltaMinutes) / 60)}h{" "}
-              {Math.abs(summary.totalDeltaMinutes) % 60}m
+              {formatMinutes(summary.totalDeltaMinutes)}
             </span>
           </div>
 
@@ -143,14 +140,6 @@ export default function HistoryList({ periodId, onTotalMinutes }: Props) {
 
       {/* ===== LISTA DE DÍAS ===== */}
       {items.map((item) => {
-        const workedH = Math.floor(item.workedMinutes / 60);
-        const workedM = item.workedMinutes % 60;
-
-        const deltaH = Math.floor(Math.abs(item.deltaMinutes) / 60);
-        const deltaM = Math.abs(item.deltaMinutes) % 60;
-
-        const isPositive = item.deltaMinutes >= 0;
-
         const statusStyle =
           item.status === "NORMAL"
             ? "bg-success-soft text-success"
@@ -200,18 +189,17 @@ export default function HistoryList({ periodId, onTotalMinutes }: Props) {
             <div className="flex items-center justify-between text-sm">
 
               <span className="font-medium text-text">
-                {workedH}h {workedM}m
+                {formatMinutes(item.workedMinutes)}
               </span>
 
               <span
                 className={
-                  isPositive
+                  item.deltaMinutes >= 0
                     ? "text-success font-medium"
                     : "text-danger font-medium"
                 }
               >
-                {isPositive ? "+" : "-"}
-                {deltaH}h {deltaM}m
+                {formatMinutes(item.deltaMinutes)}
               </span>
 
             </div>

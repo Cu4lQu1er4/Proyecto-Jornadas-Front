@@ -33,6 +33,8 @@ export default function EmployeePeriods({
           `/work/admin/employees/${employeeId}/periods`
         ) as Period[];
 
+        console.log("PERIODS:", data);
+
         setPeriods(data ?? []);
       } catch (error) {
         console.error("Error loading periods:", error);

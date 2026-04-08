@@ -38,6 +38,8 @@ export default function EmployeeDetail({ employee }: { employee: Employee }) {
   const [tempPassword, setTempPassword] = useState<string | null>(null);
   const [tempPin, setTempPin] = useState<string | null>(null);
   const [tab, setTab] = useState<TabType>("schedule");
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   async function handleToggleActive() {
     try {
@@ -105,6 +107,21 @@ export default function EmployeeDetail({ employee }: { employee: Employee }) {
       setSchedule(data);
     } catch {
       setSchedule(null);
+    }
+  }
+
+  async function handleDeleteUser() {
+    try {
+      setDeleteLoading(true);
+
+      await userAdminApi.deleteUser(employee.id);
+
+      toast.success("Usuario eliminado correctamente");
+
+      router.push("/admin/employees");
+      router.refresh();
+    } catch (error: any) {
+      toast.error(error?.message || "No se pudo eliminar el usuario");
     }
   }
   
@@ -229,6 +246,16 @@ export default function EmployeeDetail({ employee }: { employee: Employee }) {
           >
             Resetear PIN
           </button>
+
+          {employee.role !== "ADMIN" && (
+            <button
+              onClick={() => setDeleteOpen(true)}
+              className="
+                h-10 px-4 rounded-xl bg-danger text-white text-sm font-medium hover:opacity-90"
+            >
+              Eliminar usuario
+            </button>
+          )}
         </div>
       </motion.section>
 
@@ -418,6 +445,55 @@ export default function EmployeeDetail({ employee }: { employee: Employee }) {
                 Cancelar
               </button>
 
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>
+      )}
+
+      {deleteOpen && (
+        <AnimatePresence>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.95 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.95 }}
+              className="
+                bg-white border border-border rounded-2xl p-6 w-full max-w-md flex flex-col gap-6"
+            >
+              <div className="flex flex-col gap-2">
+                <h3 className="text-lg font-semibold text-danger">
+                  Eliminar usuario
+                </h3>
+
+                <p className="text-sm text-text-muted">
+                  Esta accion eliminara permanentemente al usuario.
+                </p>
+                
+                <p className="text-sm font-medium text-danger">
+                  Esta accion NO se puede deshacer
+                </p>
+              </div>
+
+              <div className="flex gap-3 justify-end">
+                <button
+                  onClick={() => setDeleteOpen(false)}
+                  className="h-10 px-4 rounded-xl border border-border text-sm"
+                >
+                  Cancelar
+                </button>
+
+                <button
+                  onClick={handleDeleteUser}
+                  className="h-10 px-4 rounded-xl bg-danger text-white text-sm font-medium"
+                >
+                  Eliminar
+                </button>
+              </div>
             </motion.div>
           </motion.div>
         </AnimatePresence>

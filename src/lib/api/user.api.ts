@@ -12,7 +12,7 @@ export const userAdminApi = {
     }),
 
   deleteUser(id: string) {
-    return http(`/admin/users/${id}`, {
+    return http(`/admin/employees/${id}`, {
       method: "DELETE",
     });
   }

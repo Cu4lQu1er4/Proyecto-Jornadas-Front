@@ -56,7 +56,7 @@ export default function EmployeePeriodSummary({
 
   if (!periodId) return null;
 
-  if (!loading) {
+  if (loading) {
     return (
       <div className="bg-white border border-border rounded-2xl p-6">
         <p className="text-sm text-text-muted">

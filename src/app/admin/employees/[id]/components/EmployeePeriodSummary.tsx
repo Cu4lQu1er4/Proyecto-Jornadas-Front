@@ -1,8 +1,7 @@
-'use client';
-
 import { useEffect, useState } from "react";
 import StatusBadge from "./StatusBadge";
 import { http } from "@/lib/http";
+import { formatMinutes } from "@/lib/utils/time";
 
 type Day = {
   date: string;
@@ -53,45 +52,43 @@ export default function EmployeePeriodSummary({
     }
 
     load();
-  }, [periodId]);
+  }, [periodId, employeeId]);
 
   if (!periodId) return null;
 
-  if (loading) {
+  if (!loading) {
     return (
       <div className="bg-white border border-border rounded-2xl p-6">
         <p className="text-sm text-text-muted">
-          Cargando resumen del período...
+          Cargando resumen del periodo...
         </p>
       </div>
     );
   }
 
+  const totalJustified = days.reduce((a, d) => a + d.justifiedMinutes, 0);
+  const totalUnjustified = days.reduce((a, d) => a + d.unjustifiedMinutes, 0);
+
   return (
-    <div
-      className="bg-white border border-border rounded-2xl p-6 flex flex-col gap-8"
-    >
+    <div className="bg-white border border-border rounded-2xl p-6 flex flex-col gap-8">
       <div className="flex flex-col gap-1">
         <h2 className="text-lg font-semibold">
           Resumen del periodo
         </h2>
         <p className="text-sm text-text-muted">
-          Detalle consolidado de asistencia
+          Detalle consolidado de asistenia
         </p>
       </div>
 
-      {/* Totales */}
       {totals && (
         <div className="flex flex-col gap-8">
-
-          {/* Nivel 1 - Obligación vs Trabajo */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="flex flex-col gap-1">
               <span className="text-sm text-text-muted">
-                Minutos esperados
+                Minutes esperados
               </span>
               <span className="text-xl font-semibold text-text">
-                {totals.expected} min
+                {formatMinutes(totals.expectedMinutes)}
               </span>
             </div>
 
@@ -100,19 +97,18 @@ export default function EmployeePeriodSummary({
                 Minutos trabajados
               </span>
               <span className="text-xl font-semibold text-text">
-                {totals.worked} min
+                {formatMinutes(totals.workedMinutes)}
               </span>
             </div>
           </div>
 
-          {/* Nivel 2 - Ajustes */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gp-6">
             <div className="flex flex-col gap-1">
               <span className="text-sm text-text-muted">
                 Justificado
               </span>
               <span className="text-lg font-semibold text-primary">
-                {totals.justified} min
+                {formatMinutes(totalJustified)}
               </span>
             </div>
 
@@ -121,21 +117,18 @@ export default function EmployeePeriodSummary({
                 Injustificado
               </span>
               <span className="text-lg font-semibold text-danger">
-                {totals.unjustified} min
+                {formatMinutes(totalUnjustified)}
               </span>
             </div>
           </div>
 
-          {/* Nivel 3 - Impacto final */}
           <div className="border-t border-border pt-6 flex flex-col gap-4">
-
             <div className="flex items-center justify-between text-sm">
               <span className="text-text-muted">
                 Delta bruto
               </span>
               <span className="font-medium">
-                {totals.rawDelta > 0 ? "+" : ""}
-                {totals.rawDelta} min
+                {formatMinutes(totals.rawDelta)}
               </span>
             </div>
 
@@ -153,33 +146,30 @@ export default function EmployeePeriodSummary({
                       : totals.netBalance < 0
                       ? "text-danger"
                       : "text-text"
-                  }
-                `}
+                  }`
+                }
               >
-                {totals.netBalance > 0 ? "+" : ""}
-                {totals.netBalance} min
+                {formatMinutes(totals.netBalance)}
               </span>
             </div>
 
-            {totals.isIrregular && (
+            {totals.isIrregular ? (
               <div className="px-4 py-2 rounded-xl bg-danger-soft text-danger text-sm font-medium">
-                Período con irregularidades
+                Periodo con irregularidades
+              </div>
+            ): (
+              <div className="px-4 py-4 rounded-xl bg-success-soft text-success text-sm font-medium">
+                Periodo sin irregularidades
               </div>
             )}
-
-            {!totals.isIrregular && (
-              <div className="px-4 py-2 rounded-xl bg-success-soft text-success text-sm font-medium">
-                Período sin irregularidades
-              </div>
-            )}
-
           </div>
         </div>
       )}
 
       <div className="flex flex-col gap-3 border-t border-border pt-6">
         {days.map((d) => {
-          const hasIssue = d.unjustifiedMinutes > 0 || d.status === "CONFLICT";
+          const hasIssue =
+            d.unjustifiedMinutes > 0 || d.status === "CONFLICT";
 
           return (
             <div
@@ -189,7 +179,7 @@ export default function EmployeePeriodSummary({
                 px-4 py-3 rounded-xl
                 border border-border
                 transition
-                ${hasIssue ? "bg-danger-soft/40" : "hover: bg-surface"}
+                ${hasIssue ? "bg-danger-soft/40" : "hover:bg-surface"}
               `}
             >
               <div className="flex flex-col gap-1">
@@ -198,9 +188,9 @@ export default function EmployeePeriodSummary({
                 </p>
 
                 <div className="flex flex-wrap items-center gap-3 text-xs text-text-muted">
-                  <span>Trab: {d.workedMinutes}</span>
-                  <span>Just: {d.justifiedMinutes}</span>
-                  <span>Injust: {d.unjustifiedMinutes}</span>
+                  <span>Trab: {formatMinutes(d.workedMinutes)}</span>
+                  <span>Just: {formatMinutes(d.justifiedMinutes)}</span>
+                  <span>Injust: {formatMinutes(d.unjustifiedMinutes)}</span>
                 </div>
               </div>
 

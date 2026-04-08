@@ -1,6 +1,9 @@
 import { http } from "../http";
 
 export const employeeScheduleApi = {
+  getMySchedule: () => 
+    http("/employee-schedules/me"),
+
   current: (employeeId: string) =>
     http(`/employee-schedules/current/${employeeId}`),
 

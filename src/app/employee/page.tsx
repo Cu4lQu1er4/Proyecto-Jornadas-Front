@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import PeriodFilter from "./components/PeriodFilter";
 import HistoryList from "./components/HistoryList";
 import CurrentWorkdayCard from "./components/CurrentWorkdayCard";
+import MySchedule from "./components/MySchedule";
 import Link from "next/link";
 import { FileText } from "lucide-react";
 
@@ -76,6 +77,9 @@ export default function EmployeePage() {
           transition={{ duration: 0.2, delay: 0.05 }}
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
         >
+
+          <MySchedule />
+          
           {/* Horas trabajadas */}
           <SummaryCard
             label="Horas trabajadas"

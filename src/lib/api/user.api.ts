@@ -11,9 +11,8 @@ export const userAdminApi = {
       method: "PATCH",
     }),
 
-  deleteUser(id: string) {
-    return http(`/admin/employees/${id}`, {
+  deleteUser: (id: string) => 
+    http(`/work/admin/employees/${id}`, {
       method: "DELETE",
-    });
-  }
+    }),
 };

@@ -7,7 +7,7 @@ export default function MySchedule() {
   const [schedule, setSchedule] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  useState(() => {
+  useEffect(() => {
     async function load() {
       try {
         const data = await employeeScheduleApi.getMySchedule();

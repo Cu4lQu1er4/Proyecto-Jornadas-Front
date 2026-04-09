@@ -75,24 +75,43 @@ export default function EmployeePage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.2, delay: 0.05 }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+          className="flex flex-col gap-6"
         >
+          <div className="bg-white border border-border rounded-2xl p-6 flex flex-col gap-6">
+            <div>
+              <h2 className="text-sm font-semibold text-text">
+                Resumen
+              </h2>
+              <p className="text-sm text-text-muted">
+                Informacion general
+              </p>
+            </div>
 
-          <MySchedule />
-          
-          {/* Horas trabajadas */}
-          <SummaryCard
-            label="Horas trabajadas"
-            value={workedTime}
-          />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="flex flex-col gap-1">
+                <span className="text-sm text-text-muted">
+                  Horas trabajadas
+                </span>
+                <span className="text-xl font-semibold text-text">
+                  {workedTime}
+                </span>
+              </div>
 
-          {/* Periodo actual */}
-          <SummaryCard
-            label="Periodo actual"
-            value={currentPeriodLabel}
-          />
+              <div className="flex flex-col gap-1">
+                <span className="text-sm text-text-muted">
+                  Periodo actual
+                </span>
+                <span className="text-xl font-semibold text-text">
+                  {currentPeriodLabel}
+                </span>
+              </div>
+            </div>
 
-          {/* Solicitudes */}
+            <div className="border-t border-border" />
+
+            <MySchedule />
+          </div>
+
           <motion.div
             whileHover={{ y: -4 }}
             whileTap={{ scale: 0.98 }}
@@ -101,17 +120,11 @@ export default function EmployeePage() {
             <Link
               href="/employee/admin-cases"
               className="
-                relative
-                bg-primary-soft border border-primary/30
-                rounded-2xl p-6
-                flex flex-col gap-4
-                hover:shadow-md hover:border-primary
-                transition
-              "
+                relative bg-primary-soft border border-primary/30
+                rounded-2xl p-6 flex flex-col gap-4 hover:shadow-md
+                hover:border-primary transition"
             >
-              {/* ICONO + TÍTULO */}
               <div className="flex items-center justify-between">
-
                 <div className="flex items-center gap-3">
                   <div className="bg-primary/20 p-3 rounded-xl">
                     <FileText className="w-5 h-5 text-primary" />
@@ -129,14 +142,13 @@ export default function EmployeePage() {
                 </div>
 
                 <span className="text-primary text-lg font-semibold">
-                  →
+                 →
                 </span>
               </div>
 
               <span className="text-xs text-text-muted">
                 Permisos, incapacidades y justificaciones
               </span>
-
             </Link>
           </motion.div>
         </motion.section>

@@ -160,7 +160,9 @@ export default function EmployeeDetail({ employee }: { employee: Employee }) {
           )}
         </div>
 
-        {children}
+        <div className="bg-white border border-border rounded-2xl p-4 sm:p-6">
+          {children}
+        </div>
       </div>
     );
   }

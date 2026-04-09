@@ -52,9 +52,7 @@ export default async function EmployeePage({
         </p>
       </header>
 
-      <section className="bg-white border border-border rounded-2xl p-6">
-        <EmployeeDetail employee={employee} />
-      </section>
+      <EmployeeDetail employee={employee} />
 
     </div>
   );

@@ -43,8 +43,13 @@ export default function CreateEmployeeModal({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    if (!document || !password || !scheduleTemplateId) {
+    if (!document || !password) {
       toast.warning("Completa todos los campos");
+      return;
+    }
+
+    if (role === "EMPLOYEE" && !scheduleTemplateId) {
+      toast.warning("Selecciona un horario");
       return;
     }
 

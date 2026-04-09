@@ -11,6 +11,7 @@ export default function MySchedule() {
     async function load() {
       try {
         const data = await employeeScheduleApi.getMySchedule();
+        console.log(data);
         setSchedule(data);
       } catch (err) {
         console.error(err);

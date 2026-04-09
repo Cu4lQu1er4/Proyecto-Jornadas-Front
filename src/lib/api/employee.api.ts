@@ -30,6 +30,7 @@ export const employeeApi = {
     document: string;
     password: string;
     scheduleTemplateId: string;
+    role: string;
   }) => 
     http("/work/admin/employees", {
       method: "POST",
@@ -41,6 +42,4 @@ export const employeeApi = {
       method: "PATCH",
       body: JSON.stringify({ active }),
     }),
-
-  
 };

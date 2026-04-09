@@ -25,6 +25,7 @@ export default function CreateEmployeeModal({
   const [scheduleTemplateId, setScheduleTemplateId] = useState("");
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(false);
+  const [role, setRole] = useState<"EMPLOYEE" | "ADMIN">("EMPLOYEE");
 
   useEffect(() => {
     async function loadTemplates() {
@@ -54,6 +55,7 @@ export default function CreateEmployeeModal({
         document,
         password,
         scheduleTemplateId,
+        role,
       });
 
       toast.success("Empleado creado correctamente");
@@ -98,21 +100,34 @@ export default function CreateEmployeeModal({
           />
 
           <select
-            value={scheduleTemplateId}
-            onChange={(e) => setScheduleTemplateId(e.target.value)}
+            value={role}
+            onChange={(e) =>
+              setRole(e.target.value as "EMPLOYEE" | "ADMIN")
+            }
             className="h-11 px-4 rounded-xl border border-border bg-surface text-sm"
           >
-            <option value="">Seleccionar horario</option>
-
-            {templates.map((t) => (
-              <option
-                key={t.id}
-                value={t.id}
-              >
-                {t.name}
-              </option>
-            ))}
+            <option value="EMPLOYEE">Empleado</option>
+            <option value="ADMIN">Administrador</option>
           </select>
+
+          {role === "EMPLOYEE" && (
+            <select
+              value={scheduleTemplateId}
+              onChange={(e) => setScheduleTemplateId(e.target.value)}
+              className="h-11 px-4 rounded-xl border border-border bg-surface text-sm"
+            >
+              <option value="">Seleccionar horario</option>
+
+              {templates.map((t) => (
+                <option
+                  key={t.id}
+                  value={t.id}
+                >
+                  {t.name}
+                </option>
+              ))}
+            </select>
+          )}
 
           <div className="flex justify-end gap-3">
 

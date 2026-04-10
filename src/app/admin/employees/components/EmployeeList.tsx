@@ -113,7 +113,7 @@ export default function EmployeeList({ employees }: { employees: Employee[] }) {
                       {fullName || e.document}
                     </p>
 
-                    {e.pendingCases && e.pendingCases > 0 && (
+                    {e.pendingCases && e.pendingCases > 1 && (
                       <span
                         className="
                           flex items-center justify-center min-w-[20px]

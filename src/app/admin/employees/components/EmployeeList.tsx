@@ -13,6 +13,7 @@ type Employee = {
   firstName?: string;
   lastName?: string;
   email?: string | null;
+  pendingCases?: number;
 };
 
 export default function EmployeeList({ employees }: { employees: Employee[] }) {
@@ -107,9 +108,22 @@ export default function EmployeeList({ employees }: { employees: Employee[] }) {
                 sm:flex-row sm:items-center sm:justify-between
               ">
                 <div className="flex flex-col gap-2">
-                  <p className="text-sm font-medium text-text">
-                    {fullName || e.document}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-medium text-text">
+                      {fullName || e.document}
+                    </p>
+
+                    {e.pendingCases && e.pendingCases > 0 && (
+                      <span
+                        className="
+                          flex items-center justify-center min-w-[20px]
+                          h-5 px-1 text-[10px] font-bold bg-danger
+                          text-white rounded-full"
+                      >
+                        {e.pendingCases}
+                      </span>
+                    )}
+                  </div>
 
                   <div className="
                     flex flex-wrap items-center

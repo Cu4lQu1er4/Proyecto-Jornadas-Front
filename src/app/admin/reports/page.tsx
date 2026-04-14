@@ -13,6 +13,7 @@ type Summary = {
   rows: {
     employeeId: string;
     document: string;
+    name: string;
     workedDays: number;
     absences: number;
     justified: number;
@@ -170,6 +171,10 @@ export default function AdminReportsPage() {
                     >
                       {/* INFO */}
                       <div className="flex flex-col gap-1">
+                        <span className="font-medium">
+                          {row.name || row.document}
+                        </span>
+
                         <span className="font-medium text-text">
                           {row.document}
                         </span>

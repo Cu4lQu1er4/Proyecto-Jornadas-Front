@@ -59,6 +59,33 @@ export default function EmployeePeriodSummary({
     return `${d}/${m}/${y}`;
   }
 
+  async function downloadPdf() {
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/admin/attendance/pdf/${employeeId}/${periodId}`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error("Error al generar PDF");
+      }
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.click();
+
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+      alert("No se pudo descargar el PDF");
+    }
+  }
+
   if (!periodId) return null;
 
   if (loading) {
@@ -76,13 +103,25 @@ export default function EmployeePeriodSummary({
 
   return (
     <div className="bg-white border border-border rounded-2xl p-6 flex flex-col gap-8">
-      <div className="flex flex-col gap-1">
-        <h2 className="text-lg font-semibold">
-          Resumen del periodo
-        </h2>
-        <p className="text-sm text-text-muted">
-          Detalle consolidado de asistenia
-        </p>
+      <div className="flex justify-between items-start">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-lg font-semibold">
+            Resumen del periodo
+          </h2>
+          <p className="text-sm text-text-muted">
+            Detalle consolidado de asistenia
+          </p>
+        </div>
+
+        <button
+          onClick={downloadPdf}
+          className="
+            h-10 px-4 rounded-xl bg-primary text-white
+            text-sm font-medium hover:opacity-90 transition
+          "
+        >
+          Descargar PDF
+        </button>
       </div>
 
       {totals && (

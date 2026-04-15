@@ -85,7 +85,7 @@ export default function EmployeePeriodSummary({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="flex flex-col gap-1">
               <span className="text-sm text-text-muted">
-                Minutes esperados
+                Dias esperados
               </span>
               <span className="text-xl font-semibold text-text">
                 {formatMinutes(totals.expectedMinutes)}
@@ -94,7 +94,7 @@ export default function EmployeePeriodSummary({
 
             <div className="flex flex-col gap-1">
               <span className="text-sm text-text-muted">
-                Minutos trabajados
+                Dias trabajados
               </span>
               <span className="text-xl font-semibold text-text">
                 {formatMinutes(totals.workedMinutes)}

@@ -62,7 +62,7 @@ export default function EmployeePeriodSummary({
   async function downloadPdf() {
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/admin/attendance/pdf/${employeeId}/${periodId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/work/pdf/${employeeId}/${periodId}`,
         {
           method: "GET",
           credentials: "include",

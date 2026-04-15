@@ -54,6 +54,11 @@ export default function EmployeePeriodSummary({
     load();
   }, [periodId, employeeId]);
 
+  function formatDate(ymd: string) {
+    const [y, m, d] = ymd.split("-");
+    return `${d}/${m}/${y}`;
+  }
+
   if (!periodId) return null;
 
   if (loading) {
@@ -184,7 +189,7 @@ export default function EmployeePeriodSummary({
             >
               <div className="flex flex-col gap-1">
                 <p className="text-sm font-medium text-text">
-                  {new Date(d.date).toLocaleDateString()}
+                  {formatDate(d.date)}
                 </p>
 
                 <div className="flex flex-wrap items-center gap-3 text-xs text-text-muted">

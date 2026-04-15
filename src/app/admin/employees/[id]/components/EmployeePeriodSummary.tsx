@@ -62,7 +62,7 @@ export default function EmployeePeriodSummary({
   async function downloadPdf() {
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/work/pdf/${employeeId}/${periodId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/work/pdf/${employeeId}/${periodId}`
         {
           method: "GET",
           credentials: "include",
@@ -77,9 +77,12 @@ export default function EmployeePeriodSummary({
       const url = window.URL.createObjectURL(blob);
 
       const a = document.createElement("a");
+      a.href = url;
+      a.download = `reporte-${employeeId}.pdf`;
+      document.body.appendChild(a);
       a.click();
 
-      window.URL.revokeObjectURL(url);
+      a.remove();
     } catch (err) {
       console.error(err);
       alert("No se pudo descargar el PDF");

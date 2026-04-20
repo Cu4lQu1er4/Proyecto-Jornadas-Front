@@ -3,12 +3,14 @@ import { http } from "../http";
 function getLocalISODate() {
   const now = new Date();
 
-  return new Date(
+  const local = new Date(
     now.getFullYear(),
     now.getMonth(),
     now.getDate(),
     0, 0, 0
-  ).toISOString();
+  );
+
+  return local.toISOString().split(".")[0] + "Z";
 }
 
 export const employeeScheduleApi = {

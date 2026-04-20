@@ -79,7 +79,7 @@ export default function EmployeeDetail({ employee }: { employee: Employee }) {
 
       await employeeScheduleApi.assign(
         employee.id,
-        templateId
+        templateId,
         getTodayLocalYMD()
       );
       

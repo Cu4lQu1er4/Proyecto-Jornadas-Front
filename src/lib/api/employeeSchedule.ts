@@ -1,16 +1,8 @@
 import { http } from "../http";
 
-function getLocalISODate() {
+function getTodayYmd() {
   const now = new Date();
-
-  const local = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate(),
-    0, 0, 0
-  );
-
-  return local.toISOString().split(".")[0] + "Z";
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 }
 
 export const employeeScheduleApi = {
@@ -26,7 +18,7 @@ export const employeeScheduleApi = {
       body: JSON.stringify({
         employeeId,
         scheduleTemplateId: templateId,
-        effectiveFrom: effectiveFrom ?? getLocalISODate(),
+        effectiveFrom: effectiveFrom ?? getTodayYmd(),
       }),
     });
   },
